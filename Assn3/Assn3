@@ -11,11 +11,12 @@
 *
 *  2,3   Num 1 - Even Odd Pair
 *  4     Num 2
+*  8     Total Count
 *  9     Operation Type
 * 10     Addition Count
 * 11     Subtraction Count
 * 12     Multiplication Count
-* 13     Division Count     
+* 13     Division Count    
 * 15     Base Register
 ********************************************
 MAIN     CSECT
@@ -23,8 +24,12 @@ MAIN     CSECT
          SR    10,10            Zero Operation Counts
          SR    11,11
          SR    12,12
-         SR    13,13 
-LOOP     XREAD BUFFER,80
+         SR    13,13
+         SR    8,8
+         XPRNT PRGHDR,70        Prints program header
+         XPRNT COLHDR,53        Prints column proceedings
+         XPRNT LINEBRK,109      Prints line break 
+LOOP     XREAD BUFFER,80        Read from stdin into buffer
          BC    B'0100',ENDLOOP  End loop if EOF reached
          SR    2,2              Assure Even Odd Pair is zeroed
          XDECI 9,BUFFER         Read operation type
@@ -38,7 +43,8 @@ LOOP     XREAD BUFFER,80
          BE    MULT
          C     9,=F'4'          Is division?
          BE    DIV  
-AFTEROP  B     LOOP             Back to top
+AFTEROP  A     8,=F'1'         Increment total count
+         B     LOOP             Back to top
          SPACE
 ADD      XDECO 3,ANUM1          Format first num for output
          XDECO 4,ANUM2          Format second num for output
@@ -67,42 +73,77 @@ MULT     XDECO 3,MNUM1          Format first num for output
          SPACE
 DIV      XDECO 3,DNUM1          Format first num for output
          XDECO 4,DNUM2          Format second num for output
-         C     3,=F'0'          If !(NUM1 < 0)
-         BC    B'1011',POS      Num1 is positive
-         S     2,=F'1'          Negate first half of num1
-POS      DR    2,4              Divide first num by second
+         M     2,=F'1'          Make R3 64-bit number
+         DR    2,4              Divide first num by second
          XDECO 3,DRES           Format result for output
          XDECO 2,DREM           Format remainder for output
          XPRNT DIVLINE,101      Prints DIVLINE output
          A     13,=F'1'         Increment Division Count
          B     AFTEROP          Goes back to loop
          SPACE
-ENDLOOP  DS    0C
+ENDLOOP  XDECO 8,TTLCNT         Sends total count to output
+         XPRNT TTLOUT,32        Prints total count for output
+         XDECO 10,ADCOUNT       Sends add count to output     
+         XDECO 11,SBCOUNT       Sends sub count to output
+         XDECO 12,MTCOUNT       Sends mult count to output
+         XDECO 13,DVCOUNT       Sends div count to output
+         XPRNT OPCNTS,103       Prints all op counts
          BR    14               Branches to end of program
+         SPACE
+PRGHDR   DC    C' '             Formats program header - 70 long
+         DC    48C' '           
+         DC    C'Results of Arithmetic'
+         SPACE
+COLHDR   DC    C'0'             Formats column header - 53 long
+         DC    C'Operation             '
+         DC    C'Num 1       '
+         DC    C'Num 2       '
+         DC    C'Result'
+         SPACE
+LINEBRK  DC    C' '             Creates line break - 109 long
+         DC    108C'-'
+         SPACE
+TTLOUT   DC    C'-'             Formats Total count line - 32 long
+         DC    C'Total Calculations:'
+TTLCNT   DS    12C
+         SPACE
+OPCNTS   DC    C' '             Formats op count lines - 103 long
+         DC    C'Addition:'
+ADCOUNT  DS    12C
+         DC    3C' '
+         DC    C'Subtraction:'
+SBCOUNT  DS    12C
+         DC    3C' '
+         DC    C'Multiplication:'
+MTCOUNT  DS    12C
+         DC    3C' '
+         DC    C'Division:'
+DVCOUNT  DS    12C
+         SPACE
 BUFFER   DS    80C              Creates BUFFER variable
          SPACE
-ADDLINE  DC    C'0'             Formats the ADDLINE output - 71 long
+ADDLINE  DC    C'0'             Formats the ADDLINE out - 71 long
          DC    C'Addition       '
 ANUM1    DS    12C
 ANUM2    DS    12C
          DC    C'        Sum:       '
 ARES     DS    12C
          SPACE
-SUBLINE  DC    C'0'             Formats the SUBLINE output - 71 long
+SUBLINE  DC    C'0'             Formats the SUBLINE out - 71 long
          DC    C'Subtraction    '
 SNUM1    DS    12C
 SNUM2    DS    12C
          DC    C'        Difference:'
 SRES     DS    12C              
          SPACE
-MULTLINE DC    C'0'             Formats the MULTLINE output - 71 long
+MULTLINE DC    C'0'             Formats the MULTLINE out - 71 long
          DC    C'Multiplication:'
 MNUM1    DS    12C
 MNUM2    DS    12C
          DC    C'        Product:   '
 MRES     DS    12C
          SPACE
-DIVLINE  DC    C'0'             Formats the DIVLINE output - 101 long
+DIVLINE  DC    C'0'             Formats the DIVLINE out - 101 long
          DC    C'Division       '
 DNUM1    DS    12C
 DNUM2    DS    12C
