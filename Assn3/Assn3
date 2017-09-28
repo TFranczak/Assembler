@@ -21,6 +21,7 @@
 ********************************************
 MAIN     CSECT
          USING MAIN,15
+         TITLE 'Main Loop'    Sets page title
          SR    10,10            Zero Operation Counts
          SR    11,11
          SR    12,12
@@ -46,6 +47,8 @@ LOOP     XREAD BUFFER,80        Read from stdin into buffer
 AFTEROP  A     8,=F'1'         Increment total count
          B     LOOP             Back to top
          SPACE
+         TITLE 'Operation calculations and print statements'
+         EJECT
 ADD      XDECO 3,ANUM1          Format first num for output
          XDECO 4,ANUM2          Format second num for output
          AR    3,4              Add both nums
@@ -90,6 +93,8 @@ ENDLOOP  XDECO 8,TTLCNT         Sends total count to output
          XPRNT OPCNTS,103       Prints all op counts
          BR    14               Branches to end of program
          SPACE
+         TITLE 'Variables Declarations and program end'
+         EJECT
 PRGHDR   DC    C' '             Formats program header - 70 long
          DC    48C' '           
          DC    C'Results of Arithmetic'
