@@ -1,0 +1,52 @@
+//KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Assignment 3 - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value to put in table
+* 11     Return Address
+* 15     Base register
+********************************************
+MAIN     CSECT
+         USING MAIN,15
+         LA    4,TABLE
+         BAL   11,BUILD
+
+
+BUILD    
+BLOOP1   XREAD BUFFER,80          Read line into buffer
+         BC    B'0100',ENDBLP1    End of file?
+         XDECI 6,BUFFER           Read first number into R5
+         B     DECIPHER           Branch into loop
+BLOOP2   XDECI 6,0(0,1)           Read next number into R5
+DECIPHER BC    B'0010',ENDBLP1    If not found -> ENDBLP
+         ST    6,0(0,4)           Store number in table
+         A     4,=F'4'            Increment table pointer
+         B     BLOOP1             Back to BLOOP1
+ENDBLP1  STR   4,5                
+         B     11                 Back to main
+BUFFER   DS    80C                
+         SPACE
+         SPACE
+PRINT
+
+
+         SPACE
+         SPACE
+PRINTO
+         LTORG                    Literal origin
+TABLE    DS    60F
+EOT      DS    F
+PLIST    DC    A(TABLE)
+         DC    A(EOT)
+/*
+//FT05F001 DD DSN=KC02314.AUTUMN17.CSCI360.HW4DATA,DISP=SHR
+//
