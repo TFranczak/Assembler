@@ -70,9 +70,15 @@ NUMS     DS    6CL12              Declare array of nums
 #PRINTO   LM    4,5,0(0,1)         Unload PLIST into R4 and R5
 #         L     7,8(0,1)           Unload PLIST into R7
 #         STM   0,15,0(0,7)        Save copy of registers
+#OLOOP    LA    8,ONUMS            Load address of nums 
+#         MVI   LINE,C' '          Clear LINE
+#         MVC   LINE+1(72),LINE    Clear LINE
+#OLOOP2   CR    5,4                EOT?    
+#         BE    ENDOLP             got to ENDOLP
+#         L     6,0(0,4)           load table value into R6
 #         
-#         LM    0,15,0(0,7)
-#         B     11     
+#         LM    0,15,0(0,7)        Load copy of registers
+#         B     11                 Branch back to main  
          LTORG                    Literal origin
 TABLE    DC    49F'-16'           Declare Table
 EOT      DS    F                  Declare End of Table
