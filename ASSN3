@@ -76,9 +76,14 @@ NUMS     DS    6CL12              Declare array of nums
 #OLOOP2   CR    5,4                EOT?    
 #         BE    ENDOLP             got to ENDOLP
 #         L     6,0(0,4)           load table value into R6
+#         Not sure if we should divide before XDECO or After
+#         XDECO 6,0(0,8)           send numbers to ONUM
+#         A     4,=F'4'            increment table pointer
+#         A     8,=F'4'            increment ONUM pointer
 #         
 #         LM    0,15,0(0,7)        Load copy of registers
 #         B     11                 Branch back to main  
+#ONUM     CS    6CL12              Declare array of Odd Numbers
          LTORG                    Literal origin
 TABLE    DC    49F'-16'           Declare Table
 EOT      DS    F                  Declare End of Table
