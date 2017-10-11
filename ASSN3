@@ -26,9 +26,10 @@ MAIN     CSECT
          SPACE
          SPACE
          SPACE
-BUILD    STM   0,15,0(7)          Save copy of registers
-         LM    4,5,0(1)           Unload PLIST into R4 and R5
-         L     7,8(0,1)           Unload PLIST into R7
+BUILD     STM   0,15,BRLIST     TESTING
+          LM    4,5,0(1)           Unload PLIST into R4 and R5
+*         L     7,8(0,1)           Unload PLIST into R7
+*         STM   0,15,0(7)          Save copy of registers
 BLOOP1   XREAD BUFFER,80          Read line into buffer
          BC    B'0100',ENDBLP1    End of file?
          XDECI 6,BUFFER           Read first number into R6
@@ -39,16 +40,19 @@ DECIPHER BC    B'0001',BLOOP1     At end of line?
          A     4,=F'4'            Increment table pointer
          B     BLOOP2             Back to BLOOP2
 ENDBLP1  ST    4,0(5)             Store end of table
-         LM    0,15,0(7)          Load register list
+*         LM    0,15,0(7)          Load register list
+         LM    0,15,BRLIST        Load register list-TEST
          BR    11                 Back to main
 BUFFER   DS    80C                Declare Buffer
          DC    C'*'               End for XDECI
+BRLIST   DS    16F          TESTING
          SPACE
          SPACE
          SPACE
-PRINT    STM   0,15,0(7)          Save copy of registers
+PRINT    STM    0,15,BRLIST1    TESTING
          LM    4,5,0(1)           Unload PLIST into R4 and R5
-         L     7,8(0,1)           Unload PLIST into R7
+*         L     7,8(0,1)           Unload PLIST into R7
+*         STM   0,15,0(7)          Save copy of registers
 PLOOP1   LA    8,NUMS             Load address of NUMS
          MVI   LINE,C' '          Clear LINE
          MVC   LINE+1(72),LINE    Clear LINE
@@ -60,10 +64,12 @@ PLOOP2   CR    5,4                EOT = Table Ptr?
          A     8,=F'4'            Increment NUMS pointer
          XPRNT LINE,73            Print line
 ENDPLP   XPRNT LINE,73            Print last line from table
-         LM    0,15,0(7)          Load copy of registers
+*         LM    0,15,0(7)          Load copy of registers
+         LM    0,15,BRLIST1   TESTING
          BR    11                 Branch back into main
 LINE     DC    C'0'               Declare print line - 73
 NUMS     DS    6CL12              Declare array of nums
+PRLIST   DS    16F           TESTING
          SPACE
          SPACE
          SPACE
