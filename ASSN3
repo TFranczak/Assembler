@@ -35,20 +35,20 @@ BLOOP1   XREAD BUFFER,80          Read line into buffer
          B     DECIPHER           Branch into BLOOP2
 BLOOP2   XDECI 6,0(0,1)           Read next number into R6
 DECIPHER BC    B'0100',ENDBLP1
-         ST    6,0(0,4)           Store number in table
+         ST    6,0(4)           Store number in table
          A     4,=F'4'            Increment table pointer
          B     BLOOP1             Back to BLOOP1
-ENDBLP1  ST    4,0(0,5)           Store end of table     
-         LM    0,15,0(0,7)        Load register list
+ENDBLP1  ST    4,0(5)           Store end of table     
+         LM    0,15,0(7)        Load register list
          BR    11                 Back to main
 BUFFER   DS    80C                Declare Buffer
          DC    C'*'               End for XDECI
          SPACE
          SPACE
          SPACE
-PRINT    LM    4,5,0(0,1)         Unload PLIST into R4 and R5
+PRINT    LM    4,5,0(1)         Unload PLIST into R4 and R5
          L     7,8(0,1)           Unload PLIST into R7
-         STM   0,15,0(0,7)        Save copy of registers
+         STM   0,15,0(7)        Save copy of registers
 PLOOP1   LA    8,NUMS             Load address of NUMS
          MVI   LINE,C' '          Clear LINE
          MVC   LINE+1(72),LINE    Clear LINE
@@ -60,16 +60,16 @@ PLOOP2   CR    5,4                EOT = Table Ptr?
          A     8,=F'4'            Increment NUMS pointer
          XPRNT LINE,73            Print line
 ENDPLP   XPRNT LINE,73            Print last line from table
-         LM    0,15,0(0,7)        Load copy of registers
+         LM    0,15,0(7)        Load copy of registers
          B     11                 Branch back into main
 LINE     DC    C'0'               Declare print line - 73
 NUMS     DS    6CL12              Declare array of nums
          SPACE
          SPACE
          SPACE
-#PRINTO   LM    4,5,0(0,1)         Unload PLIST into R4 and R5
+#PRINTO   LM    4,5,0(1)         Unload PLIST into R4 and R5
 #         L     7,8(0,1)           Unload PLIST into R7
-#         STM   0,15,0(0,7)        Save copy of registers
+#         STM   0,15,0(7)        Save copy of registers
 #OLOOP    LA    8,ONUMS            Load address of nums 
 #         MVI   LINE,C' '          Clear LINE
 #         MVC   LINE+1(72),LINE    Clear LINE
@@ -81,7 +81,7 @@ NUMS     DS    6CL12              Declare array of nums
 #         A     4,=F'4'            increment table pointer
 #         A     8,=F'4'            increment ONUM pointer
 #         
-#         LM    0,15,0(0,7)        Load copy of registers
+#         LM    0,15,0(7)        Load copy of registers
 #         B     11                 Branch back to main  
 #ONUM     CS    5CL12              Declare array of Odd Numbers
          LTORG                    Literal origin
