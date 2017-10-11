@@ -26,9 +26,9 @@ MAIN     CSECT
          SPACE
          SPACE
          SPACE
-BUILD    LM    4,5,0(0,1)         Unload PLIST into R4 and R5
+BUILD    LM    4,5,0(1)         Unload PLIST into R4 and R5
          L     7,8(0,1)           Unload PLIST into R7
-         STM   0,15,0(0,7)        Save copy of registers
+         STM   0,15,0(7)        Save copy of registers
 BLOOP1   XREAD BUFFER,80          Read line into buffer
          BC    B'0100',ENDBLP1    End of file?
          XDECI 6,BUFFER           Read first number into R6
