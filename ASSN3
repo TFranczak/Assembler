@@ -12,9 +12,10 @@
 *  4     Table Pointer
 *  5     EOT Pointer
 *  6     Value in table
-*  7     Register list
+*  7     Division
 *  8     Address of Outline variables
 *  9     Counter variable
+* 10     Keep copy of register
 * 11     Return Address
 * 15     Base register
 ********************************************
@@ -23,12 +24,14 @@ MAIN     CSECT
          LA    1,PLIST
          BAL   11,BUILD
          BAL   11,PRINT
+         BAL   11,PRINTO
          BR    14
          SPACE
          SPACE
          SPACE
 BUILD    STM   0,15,BRLIST        Copy registers
          LM    4,5,0(1)           Unload PLIST into R4 and R5
+         SR    9,9                Zero Register
 BLOOP1   XREAD BUFFER,80          Read line into buffer
          BC    B'0100',ENDBLP1    End of file?
          XDECI 6,BUFFER           Read first number into R6
@@ -37,21 +40,21 @@ BLOOP2   XDECI 6,0(0,1)           Read next number into R6
 DECIPHER BC    B'0001',BLOOP1     At end of line?
          ST    6,0(4)             Store number in table
          A     4,=F'4'            Increment table pointer
-         
+         A     9,=F'1'            Increment number counter
+         C     9,=F'49'           If table is full?
+         BE    ENDBLP1            Stop reading
          B     BLOOP2             Back to BLOOP2
 ENDBLP1  ST    4,0(5)             Store end of table
          LM    0,15,BRLIST        Load register list-TEST
          BR    11                 Back to main
 BUFFER   DS    80C                Declare Buffer
          DC    C'*'               End for XDECI
-BRLIST   DS    16F          TESTING
+BRLIST   DS    16F                Register list
          SPACE
          SPACE
          SPACE
-PRINT    STM    0,15,PRLIST    TESTING
+PRINT    STM   0,15,PRLIST        Store register copies
          LM    4,5,0(1)           Unload PLIST into R4 and R5
-*         L     7,8(0,1)           Unload PLIST into R7
-*         STM   0,15,0(7)          Save copy of registers
          SR    9,9                Zero loop counter
 PLOOP1   LA    8,NUMS             Load address of NUMS
          MVI   LINE,C' '          Clear LINE
@@ -69,40 +72,54 @@ PLOOP2   CR    5,4                EOT = Table Ptr?
 PRNTLN   XPRNT LINE,73            Print line
          SR    9,9                Zero loop counter
          B     PLOOP1             Again
-ENDPLP   XPRNT LINE,73            Print last line from table
-*         LM    0,15,0(7)          Load copy of registers
-         LM    0,15,PRLIST   TESTING
+ENDPLP   C     9,=F'0'             Is counter 0?
+         BE    SKIPLAST           Skip last print
+         XPRNT LINE,73            Print last line from table
+SKIPLAST LM    0,15,PRLIST        Load copy of registers
          BR    11                 Branch back into main
 LINE     DC    C'0'               Declare print line - 73
 NUMS     DS    6CL12              Declare array of nums
-PRLIST   DS    16F           TESTING
+PRLIST   DS    16F                Register copy
          SPACE
          SPACE
          SPACE
-*PRINTO   STM   0,15,0(7)          Save copy of registers
-*         LM    4,5,0(1)           Unload PLIST into R4 and R5
-*         L     7,8(0,1)           Unload PLIST into R7       
-*OLOOP    LA    8,ONUMS            Load address of nums 
-*         MVI   LINE,C' '          Clear LINE
-*         MVC   LINE+1(72),LINE    Clear LINE
-*OLOOP2   CR    5,4                EOT?    
-*         BE    ENDOLP             got to ENDOLP
-*         L     6,0(0,4)           load table value into R6
-*         Not sure if we should divide before XDECO or After
-*         XDECO 6,0(0,8)           send numbers to ONUM
-*         A     4,=F'4'            increment table pointer
-*         A     8,=F'4'            increment ONUM pointer
-*         
-*         LM    0,15,0(7)          Load copy of registers
-*         B     11                 Branch back to main  
-*ONUM     CS    5CL12              Declare array of Odd Numbers
-         LTORG                     Literal origin
+PRINTO   STM   0,15,ORLIST        Save copy of registers
+         LM    4,5,0(1)           Unload PLIST into R4 and R5
+         SR    9,9                Zero loop counter
+OLOOP    LA    8,ONUM             Load address of nums 
+         MVI   OLINE,C' '         Clear LINE
+         MVC   OLINE+1(60),OLINE  Clear LINE
+OLOOP2   CR    5,4                EOT?    
+         BE    ENDOLP             got to ENDOLP
+         L     7,0(0,4)           load table value into R7
+         LR    10,7               Copy 7 into 10
+         A     4,=F'4'            Increment table pointer
+         M     6,=F'1'            Create 64-bit num
+         D     6,=F'2'            Divide by 2
+         C     6,=F'0'            Is remainder 0?
+         BE    OLOOP2             Branch to OLOOP2
+         XDECO 10,0(0,8)          send numbers to ONUM
+         A     8,=F'12'           increment ONUM pointer
+         A     9,=F'1'            increment loop counter
+         C     9,=F'5'            is counter 5?
+         BE    PRNTLNO            Print the line
+         B     OLOOP2             OLLOP2 Again
+PRNTLNO  XPRNT OLINE,61           Print line
+         SR    9,9                Zero Counter
+         B     OLOOP              OLOOP again
+ENDOLP   C     9,=F'0'            Is counter 0?
+         BE    SKIPLSTO           Skip last print
+         XPRNT OLINE,61           Print line
+SKIPLSTO LM    0,15,ORLIST        Load copy of registers
+         BR    11                 Branch back to main  
+OLINE    DC    C'0'               Declare outline
+ONUM     DS    5CL12              Declare array of Odd Numbers
+ORLIST   DS    16F   
+         LTORG                    Literal origin
 TABLE    DC    49F'-16'           Declare Table
 EOT      DS    F                  Declare End of Table
-RLIST    DS    16F                Register list
 PLIST    DC    A(TABLE)           Parameter list
          DC    A(EOT)
-         DC    A(RLIST)
          END   MAIN
 /*
 //FT05F001 DD DSN=KC02314.AUTUMN17.CSCI360.HW4DATA,DISP=SHR
