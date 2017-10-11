@@ -34,7 +34,7 @@ BLOOP1   XREAD BUFFER,80          Read line into buffer
          XDECI 6,BUFFER           Read first number into R6
          B     DECIPHER           Branch into BLOOP2
 BLOOP2   XDECI 6,0(0,1)           Read next number into R6
-DECIPHER BC    B'0100',BLOOP1     At end of line?
+DECIPHER BC    B'0001',BLOOP1     At end of line?
          ST    6,0(4)             Store number in table
          A     4,=F'4'            Increment table pointer
          B     BLOOP2             Back to BLOOP2
