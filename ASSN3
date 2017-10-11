@@ -34,11 +34,11 @@ BLOOP1   XREAD BUFFER,80          Read line into buffer
          XDECI 6,BUFFER           Read first number into R6
          B     DECIPHER           Branch into BLOOP2
 BLOOP2   XDECI 6,0(0,1)           Read next number into R6
-         BC    B'0100',ENDBLP1
-DECIPHER ST    6,0(4)             Store number in table
+DECIPHER BC    B'0100',BLOOP1     At end of line?
+         ST    6,0(4)             Store number in table
          A     4,=F'4'            Increment table pointer
-         B     BLOOP1             Back to BLOOP1
-ENDBLP1  ST    4,0(5)             Store end of table     
+         B     BLOOP2             Back to BLOOP2
+ENDBLP1  ST    4,0(5)             Store end of table
          LM    0,15,0(7)          Load register list
          BR    11                 Back to main
 BUFFER   DS    80C                Declare Buffer
