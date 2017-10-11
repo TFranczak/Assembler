@@ -91,6 +91,7 @@ RLIST    DS    16F                Register list
 PLIST    DC    A(TABLE)           Parameter list
          DC    A(EOT)
          DC    A(RLIST)
+         END   MAIN
 /*
 //FT05F001 DD DSN=KC02314.AUTUMN17.CSCI360.HW4DATA,DISP=SHR
 //
