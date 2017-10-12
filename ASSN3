@@ -6,6 +6,10 @@
 ********************************************
 * Assignment 3 - Pair Programmed
 * Names: Tommy Franczak, Matt Rycraft
+*
+* Function: Read in numbers from file and 
+* build a table and then print out all 
+* of the numbers and all the odd numbers
 * 
 * Register Usage
 *
@@ -29,6 +33,25 @@ MAIN     CSECT
          SPACE
          SPACE
          SPACE
+********************************************
+* Build Subroutine
+*
+* Function: Reads in numbers from an 
+* unknown file and builds a table of  
+* 49 numbers
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value in table
+*  7     Division
+*  8     Address of Outline variables
+*  9     Counter variable
+* 10     Keep copy of register
+* 11     Return Address
+* 15     Base register
+********************************************         
 BUILD    STM   0,15,BRLIST        Copy registers
          LM    4,5,0(1)           Unload PLIST into R4 and R5
          SR    9,9                Zero Register
@@ -53,6 +76,24 @@ BRLIST   DS    16F                Register list
          SPACE
          SPACE
          SPACE
+********************************************
+* Print Subroutine
+*
+* Function: Prints 6 numbers to a line from 
+* the table until the EOT is found
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value in table
+*  7     Division
+*  8     Address of Outline variables
+*  9     Counter variable
+* 10     Keep copy of register
+* 11     Return Address
+* 15     Base register
+******************************************** 
 PRINT    STM   0,15,PRLIST        Store register copies
          LM    4,5,0(1)           Unload PLIST into R4 and R5
          SR    9,9                Zero loop counter
@@ -83,6 +124,25 @@ PRLIST   DS    16F                Register copy
          SPACE
          SPACE
          SPACE
+********************************************
+* Build Subroutine
+*
+* Function: Prints 5 numbers to a line from
+* the table, and only prints the odd numbers 
+* within the table 
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value in table
+*  7     Division
+*  8     Address of Outline variables
+*  9     Counter variable
+* 10     Keep copy of register
+* 11     Return Address
+* 15     Base register
+******************************************** 
 PRINTO   STM   0,15,ORLIST        Save copy of registers
          LM    4,5,0(1)           Unload PLIST into R4 and R5
          SR    9,9                Zero loop counter
