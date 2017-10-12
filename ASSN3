@@ -93,6 +93,7 @@ BRLIST   DS    16F                Register list
 * 15     Base register
 ******************************************** 
 PRINT    STM   0,15,PRLIST        Store register copies
+         XPRNT HEADER,37          Print header line
          LM    4,5,0(1)           Unload PLIST into R4 and R5
          SR    9,9                Zero loop counter
 PLOOP1   LA    8,NUMS             Load address of NUMS
@@ -116,6 +117,9 @@ ENDPLP   C     9,=F'0'             Is counter 0?
          XPRNT LINE,73            Print last line from table
 SKIPLAST LM    0,15,PRLIST        Load copy of registers
          BR    11                 Branch back into main
+HEADER   DC    C'1'               Format for header line - 37
+         DC    20C' '
+         DC    CL16'List of numbers:'
 LINE     DC    C'0'               Declare print line - 73
 NUMS     DS    6CL12              Declare array of nums
 PRLIST   DS    16F                Register copy
@@ -142,6 +146,7 @@ PRLIST   DS    16F                Register copy
 * 15     Base register
 ******************************************** 
 PRINTO   STM   0,15,ORLIST        Save copy of registers
+         XPRNT OHEADER,41         Print odd header
          LM    4,5,0(1)           Unload PLIST into R4 and R5
          SR    9,9                Zero loop counter
 OLOOP    LA    8,ONUM             Load address of nums 
@@ -169,7 +174,10 @@ ENDOLP   C     9,=F'0'            Is counter 0?
          BE    SKIPLSTO           Skip last print
          XPRNT OLINE,61           Print line
 SKIPLSTO LM    0,15,ORLIST        Load copy of registers
-         BR    11                 Branch back to main  
+         BR    11                 Branch back to main
+OHEADER  DC    C'1'               Format for header line - 41
+         DC    20C' '
+         DC    CL20'List of odd numbers:'  
 OLINE    DC    C'0'               Declare outline
 ONUM     DS    5CL12              Declare array of Odd Numbers
 ORLIST   DS    16F   
