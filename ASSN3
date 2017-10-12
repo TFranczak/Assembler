@@ -48,7 +48,6 @@ MAIN     CSECT
 *  7     Division
 *  8     Address of Outline variables
 *  9     Counter variable
-* 10     Keep copy of register
 * 11     Return Address
 * 15     Base register
 ********************************************         
@@ -90,7 +89,6 @@ BRLIST   DS    16F                Register list
 *  7     Division
 *  8     Address of Outline variables
 *  9     Counter variable
-* 10     Keep copy of register
 * 11     Return Address
 * 15     Base register
 ******************************************** 
