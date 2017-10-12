@@ -1,0 +1,275 @@
+1                    J E S 2  J O B  L O G  --  S Y S T E M  S 0 W 1  --  N O D E  Z O S K C T R         
+0 
+ 19.27.51 JOB06670 ---- THURSDAY,  12 OCT 2017 ----
+ 19.27.51 JOB06670  IRR010I  USERID KC03I36  IS ASSIGNED TO THIS JOB.
+ 19.27.51 JOB06670  ICH70001I KC03I36  LAST ACCESS AT 19:27:51 ON THURSDAY, OCTOBER 12, 2017
+ 19.27.51 JOB06670  $HASP373 KC03I36A STARTED - INIT 2    - CLASS A        - SYS S0W1
+ 19.27.51 JOB06670  -                                         --TIMINGS (MINS.)--            ----PAGING COUNTS---
+ 19.27.51 JOB06670  -JOBNAME  STEPNAME PROCSTEP    RC   EXCP    TCB    SRB  CLOCK   SERV  PG   PAGE   SWAP    VIO SWAPS
+ 19.27.51 JOB06670  -KC03I36A                      00     62 ******    .00     .0    196   0      0      0      0     0
+ 19.27.51 JOB06670  -KC03I36A ENDED.  NAME-Tommy Franczak       TOTAL TCB CPU TIME=   .00  TOTAL ELAPSED TIME=    .0
+ 19.27.51 JOB06670  $HASP395 KC03I36A ENDED
+0------ JES2 JOB STATISTICS ------
+-  12 OCT 2017 JOB EXECUTION DATE
+-          192 CARDS READ
+-          271 SYSOUT PRINT RECORDS
+-            0 SYSOUT PUNCH RECORDS
+-           20 SYSOUT SPOOL KBYTES
+-         0.00 MINUTES EXECUTION TIME
+ !! END OF JES SPOOL FILE !!
+        1 //KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H                             JOB06670
+        2 //STEP1 EXEC PGM=ASSIST                                                         
+        3 //STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR                                
+        4 //SYSPRINT DD SYSOUT=*                                                          
+        5 //SYSIN DD *                                                                    
+        6 //FT05F001 DD DSN=KC02314.AUTUMN17.CSCI360.HW4DATA,DISP=SHR                     
+        7 //                                                                              
+ !! END OF JES SPOOL FILE !!
+ ICH70001I KC03I36  LAST ACCESS AT 19:27:51 ON THURSDAY, OCTOBER 12, 2017
+ IEF236I ALLOC. FOR KC03I36A STEP1
+ IGD103I SMS ALLOCATED TO DDNAME STEPLIB
+ IEF237I JES2 ALLOCATED TO SYSPRINT
+ IEF237I JES2 ALLOCATED TO SYSIN
+ IGD103I SMS ALLOCATED TO DDNAME FT05F001
+ IEF142I KC03I36A STEP1 - STEP WAS EXECUTED - COND CODE 0000
+ IGD104I KC02293.ASSIST.LOADLIB                       RETAINED,  DDNAME=STEPLIB 
+ IEF285I   KC03I36.KC03I36A.JOB06670.D0000102.?         SYSOUT        
+ IEF285I   KC03I36.KC03I36A.JOB06670.D0000101.?         SYSIN         
+ IGD104I KC02314.AUTUMN17.CSCI360.HW4DATA             RETAINED,  DDNAME=FT05F001
+ IEF373I STEP/STEP1   /START 2017285.1927
+ IEF032I STEP/STEP1   /STOP  2017285.1927 
+         CPU:     0 HR  00 MIN  00.01 SEC    SRB:     0 HR  00 MIN  00.00 SEC    
+         VIRT:   584K  SYS:   268K  EXT:        4K  SYS:    11996K
+         ATB- REAL:                     0K  SLOTS:                     0K
+              VIRT- ALLOC:       0M SHRD:       0M
+ IEF375I  JOB/KC03I36A/START 2017285.1927
+ IEF033I  JOB/KC03I36A/STOP  2017285.1927 
+         CPU:     0 HR  00 MIN  00.01 SEC    SRB:     0 HR  00 MIN  00.00 SEC    
+ !! END OF JES SPOOL FILE !!
+1*** ASSIST 4.0/A2-05/15/82  470/V7A/0:OS/VS2  INS=SDFP7/X=BGHO, CHECK/TRC/=1180, OPTS=CDKMPR FROM PENN ST*NIU COMPSCI*LT            
+0                                                                                                                                    
+0                                                                                                               PAGE    1            
+0  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+                                       1 ********************************************                                                
+                                       2 * Assignment 3 - Pair Programmed                                                            
+                                       3 * Names: Tommy Franczak, Matt Rycraft                                                       
+                                       4 *                                                                                           
+                                       5 * Function: Read in numbers from file and                                                   
+                                       6 * build a table and then print out all                                                      
+                                       7 * of the numbers and all the odd numbers                                                    
+                                       8 *                                                                                           
+                                       9 * Register Usage                                                                            
+                                      10 *                                                                                           
+                                      11 *  4     Table Pointer                                                                      
+                                      12 *  5     EOT Pointer                                                                        
+                                      13 *  6     Value in table                                                                     
+                                      14 *  7     Division                                                                           
+                                      15 *  8     Address of Outline variables                                                       
+                                      16 *  9     Counter variable                                                                   
+                                      17 * 10     Keep copy of register                                                              
+                                      18 * 11     Return Address                                                                     
+                                      19 * 15     Base register                                                                      
+                                      20 ********************************************                                                
+ 000000                               21 MAIN     CSECT                                                                              
+ 000000                               22          USING MAIN,15                                                                      
+ 000000 4110 F408            00408    23          LA    1,PLIST                                                                      
+ 000004 45B0 F012            00012    24          BAL   11,BUILD                                                                     
+ 000008 45B0 F0EC            000EC    25          BAL   11,PRINT                                                                     
+ 00000C 45B0 F200            00200    26          BAL   11,PRINTO                                                                    
+ 000010 07FE                          27          BR    14                                                                           
+                                                                                                                                     
+                                                                                                                                     
+                                                                                                                                     
+                                      31 ********************************************                                                
+                                      32 * Build Subroutine                                                                          
+                                      33 *                                                                                           
+                                      34 * Function: Reads in numbers from an                                                        
+                                      35 * unknown file and builds a table of                                                        
+                                      36 * 49 numbers                                                                                
+                                      37 *                                                                                           
+                                      38 * Register Usage                                                                            
+                                      39 *                                                                                           
+                                      40 *  4     Table Pointer                                                                      
+                                      41 *  5     EOT Pointer                                                                        
+                                      42 *  6     Value in table                                                                     
+                                      43 *  7     Division                                                                           
+                                      44 *  8     Address of Outline variables                                                       
+                                      45 *  9     Counter variable                                                                   
+                                      46 * 11     Return Address                                                                     
+                                      47 * 15     Base register                                                                      
+                                      48 ********************************************                                                
+ 000012 900F F0AC            000AC    49 BUILD    STM   0,15,BRLIST        Copy registers                                            
+ 000016 9845 1000            00000    50          LM    4,5,0(1)           Unload PLIST into R4 and R5                               
+ 00001A 1B99                          51          SR    9,9                Zero Register                                             
+ 00001C E000 F058 0050 00058          52 BLOOP1   XREAD BUFFER,80          Read line into buffer                                     
+1                                                                                                               PAGE    2            
+0  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+ 000022 4740 F04E            0004E    53          BC    B'0100',ENDBLP1    End of file?                                              
+ 000026 5360 F058            00058    54          XDECI 6,BUFFER           Read first number into R6                                 
+ 00002A 47F0 F032            00032    55          B     DECIPHER           Branch into BLOOP2                                        
+ 00002E 5360 1000            00000    56 BLOOP2   XDECI 6,0(0,1)           Read next number into R6                                  
+ 000032 4710 F01C            0001C    57 DECIPHER BC    B'0001',BLOOP1     At end of line?                                           
+ 000036 5064 0000            00000    58          ST    6,0(4)             Store number in table                                     
+ 00003A 5A40 F320            00320    59          A     4,=F'4'            Increment table pointer                                   
+ 00003E 5A90 F324            00324    60          A     9,=F'1'            Increment number counter                                  
+ 000042 5990 F328            00328    61          C     9,=F'49'           If table is full?                                         
+ 000046 4780 F04E            0004E    62          BE    ENDBLP1            Stop reading                                              
+ 00004A 47F0 F02E            0002E    63          B     BLOOP2             Back to BLOOP2                                            
+ 00004E 5045 0000            00000    64 ENDBLP1  ST    4,0(5)             Store end of table                                        
+ 000052 980F F0AC            000AC    65          LM    0,15,BRLIST        Load register list-TEST                                   
+ 000056 07FB                          66          BR    11                 Back to main                                              
+ 000058                               67 BUFFER   DS    80C                Declare Buffer                                            
+ 0000A8 5C                            68          DC    C'*'               End for XDECI                                             
+ 0000AC                               69 BRLIST   DS    16F                Register list                                             
+                                                                                                                                     
+                                                                                                                                     
+                                                                                                                                     
+                                      73 ********************************************                                                
+                                      74 * Print Subroutine                                                                          
+                                      75 *                                                                                           
+                                      76 * Function: Prints 6 numbers to a line from                                                 
+                                      77 * the table until the EOT is found                                                          
+                                      78 *                                                                                           
+                                      79 * Register Usage                                                                            
+                                      80 *                                                                                           
+                                      81 *  4     Table Pointer                                                                      
+                                      82 *  5     EOT Pointer                                                                        
+                                      83 *  6     Value in table                                                                     
+                                      84 *  7     Division                                                                           
+                                      85 *  8     Address of Outline variables                                                       
+                                      86 *  9     Counter variable                                                                   
+                                      87 * 11     Return Address                                                                     
+                                      88 * 15     Base register                                                                      
+                                      89 ********************************************                                                
+ 0000EC 900F F1C0            001C0    90 PRINT    STM   0,15,PRLIST        Store register copies                                     
+ 0000F0 E020 F150 0025 00150          91          XPRNT HEADER,37          Print header line                                         
+ 0000F6 9845 1000            00000    92          LM    4,5,0(1)           Unload PLIST into R4 and R5                               
+ 0000FA 1B99                          93          SR    9,9                Zero loop counter                                         
+ 0000FC 4180 F176            00176    94 PLOOP1   LA    8,NUMS             Load address of NUMS                                      
+ 000100 9240 F175      00175          95          MVI   LINE,C' '          Clear LINE                                                
+ 000104 D247 F176 F175 00176 00175    96          MVC   LINE+1(72),LINE    Clear LINE                                                
+ 00010A 1954                          97 PLOOP2   CR    5,4                EOT = Table Ptr?                                          
+ 00010C 4780 F13C            0013C    98          BE    ENDPLP             Go to ENDPLOOP                                            
+ 000110 5860 4000            00000    99          L     6,0(0,4)           Load Table Value into R6                                  
+ 000114 5260 8000            00000   100          XDECO 6,0(0,8)           Send num to NUMS                                          
+ 000118 5A40 F320            00320   101          A     4,=F'4'            Increment table pointer                                   
+ 00011C 5A80 F32C            0032C   102          A     8,=F'12'           Increment NUMS pointer                                    
+ 000120 5A90 F324            00324   103          A     9,=F'1'            Increment Loop counter                                    
+ 000124 5990 F330            00330   104          C     9,=F'6'            6 on the line?                                            
+ 000128 4780 F130            00130   105          BE    PRNTLN             Go to print line                                          
+ 00012C 47F0 F10A            0010A   106          B     PLOOP2             Again                                                     
+ 000130 E020 F175 0049 00175         107 PRNTLN   XPRNT LINE,73            Print line                                                
+ 000136 1B99                         108          SR    9,9                Zero loop counter                                         
+ 000138 47F0 F0FC            000FC   109          B     PLOOP1             Again                                                     
+1                                                                                                               PAGE    3            
+0  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+ 00013C 5990 F334            00334   110 ENDPLP   C     9,=F'0'             Is counter 0?                                            
+ 000140 4780 F14A            0014A   111          BE    SKIPLAST           Skip last print                                           
+ 000144 E020 F175 0049 00175         112          XPRNT LINE,73            Print last line from table                                
+ 00014A 980F F1C0            001C0   113 SKIPLAST LM    0,15,PRLIST        Load copy of registers                                    
+ 00014E 07FB                         114          BR    11                 Branch back into main                                     
+ 000150 F1                           115 HEADER   DC    C'1'               Format for header line - 37                               
+ 000151 4040404040404040             116          DC    20C' '                                                                       
+ 000165 D389A2A340968640             117          DC    CL16'List of numbers:'                                                       
+ 000175 F0                           118 LINE     DC    C'0'               Declare print line - 73                                   
+ 000176                              119 NUMS     DS    6CL12              Declare array of nums                                     
+ 0001C0                              120 PRLIST   DS    16F                Register copy                                             
+                                                                                                                                     
+                                                                                                                                     
+                                                                                                                                     
+                                     124 ********************************************                                                
+                                     125 * Build Subroutine                                                                          
+                                     126 *                                                                                           
+                                     127 * Function: Prints 5 numbers to a line from                                                 
+                                     128 * the table, and only prints the odd numbers                                                
+                                     129 * within the table                                                                          
+                                     130 *                                                                                           
+                                     131 * Register Usage                                                                            
+                                     132 *                                                                                           
+                                     133 *  4     Table Pointer                                                                      
+                                     134 *  5     EOT Pointer                                                                        
+                                     135 *  6     Value in table                                                                     
+                                     136 *  7     Division                                                                           
+                                     137 *  8     Address of Outline variables                                                       
+                                     138 *  9     Counter variable                                                                   
+                                     139 * 10     Keep copy of register                                                              
+                                     140 * 11     Return Address                                                                     
+                                     141 * 15     Base register                                                                      
+                                     142 ********************************************                                                
+ 000200 900F F2DC            002DC   143 PRINTO   STM   0,15,ORLIST        Save copy of registers                                    
+ 000204 E020 F276 0029 00276         144          XPRNT OHEADER,41         Print odd header                                          
+ 00020A 9845 1000            00000   145          LM    4,5,0(1)           Unload PLIST into R4 and R5                               
+ 00020E 1B99                         146          SR    9,9                Zero loop counter                                         
+ 000210 4180 F2A0            002A0   147 OLOOP    LA    8,ONUM             Load address of nums                                      
+ 000214 9240 F29F      0029F         148          MVI   OLINE,C' '         Clear LINE                                                
+ 000218 D23B F2A0 F29F 002A0 0029F   149          MVC   OLINE+1(60),OLINE  Clear LINE                                                
+ 00021E 1954                         150 OLOOP2   CR    5,4                EOT?                                                      
+ 000220 4780 F262            00262   151          BE    ENDOLP             got to ENDOLP                                             
+ 000224 5870 4000            00000   152          L     7,0(0,4)           load table value into R7                                  
+ 000228 18A7                         153          LR    10,7               Copy 7 into 10                                            
+ 00022A 5A40 F320            00320   154          A     4,=F'4'            Increment table pointer                                   
+ 00022E 5C60 F324            00324   155          M     6,=F'1'            Create 64-bit num                                         
+ 000232 5D60 F338            00338   156          D     6,=F'2'            Divide by 2                                               
+ 000236 5960 F334            00334   157          C     6,=F'0'            Is remainder 0?                                           
+ 00023A 4780 F21E            0021E   158          BE    OLOOP2             Branch to OLOOP2                                          
+ 00023E 52A0 8000            00000   159          XDECO 10,0(0,8)          send numbers to ONUM                                      
+ 000242 5A80 F32C            0032C   160          A     8,=F'12'           increment ONUM pointer                                    
+ 000246 5A90 F324            00324   161          A     9,=F'1'            increment loop counter                                    
+ 00024A 5990 F33C            0033C   162          C     9,=F'5'            is counter 5?                                             
+ 00024E 4780 F256            00256   163          BE    PRNTLNO            Print the line                                            
+ 000252 47F0 F21E            0021E   164          B     OLOOP2             OLLOP2 Again                                              
+ 000256 E020 F29F 003D 0029F         165 PRNTLNO  XPRNT OLINE,61           Print line                                                
+ 00025C 1B99                         166          SR    9,9                Zero Counter                                              
+1                                                                                                               PAGE    4            
+0  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+ 00025E 47F0 F210            00210   167          B     OLOOP              OLOOP again                                               
+ 000262 5990 F334            00334   168 ENDOLP   C     9,=F'0'            Is counter 0?                                             
+ 000266 4780 F270            00270   169          BE    SKIPLSTO           Skip last print                                           
+ 00026A E020 F29F 003D 0029F         170          XPRNT OLINE,61           Print line                                                
+ 000270 980F F2DC            002DC   171 SKIPLSTO LM    0,15,ORLIST        Load copy of registers                                    
+ 000274 07FB                         172          BR    11                 Branch back to main                                       
+ 000276 F1                           173 OHEADER  DC    C'1'               Format for header line - 41                               
+ 000277 4040404040404040             174          DC    20C' '                                                                       
+ 00028B D389A2A340968640             175          DC    CL20'List of odd numbers:'                                                   
+ 00029F F0                           176 OLINE    DC    C'0'               Declare outline                                           
+ 0002A0                              177 ONUM     DS    5CL12              Declare array of Odd Numbers                              
+ 0002DC                              178 ORLIST   DS    16F                                                                          
+                                     179          LTORG                    Literal origin                                            
+ 000320 00000004                     180                =F'4'                                                                        
+ 000324 00000001                     181                =F'1'                                                                        
+ 000328 00000031                     182                =F'49'                                                                       
+ 00032C 0000000C                     183                =F'12'                                                                       
+ 000330 00000006                     184                =F'6'                                                                        
+ 000334 00000000                     185                =F'0'                                                                        
+ 000338 00000002                     186                =F'2'                                                                        
+ 00033C 00000005                     187                =F'5'                                                                        
+ 000340 FFFFFFF0FFFFFFF0             188 TABLE    DC    49F'-16'           Declare Table                                             
+ 000404                              189 EOT      DS    F                  Declare End of Table                                      
+ 000408 00000340                     190 PLIST    DC    A(TABLE)           Parameter list                                            
+ 00040C 00000404                     191          DC    A(EOT)                                                                       
+                                     192          END   MAIN                                                                         
+0***  NO   STATEMENTS FLAGGED -  NO   WARNINGS,  NO   ERRORS                                                                         
+0*** DYNAMIC CORE AREA USED:  LOW:    8492 HIGH:    1088 LEAVING:  483988 FREE BYTES. AVERAGE:       49 BYTES/STMT ***               
+0*** ASSEMBLY TIME =    0.001 SECS,   193000 STATEMENTS/SEC ***                                                                      
+0*** PROGRAM EXECUTION BEGINNING - ANY OUTPUT BEFORE EXECUTION TIME MESSAGE IS PRODUCED BY USER PROGRAM ***                          
+1                    List of numbers:                                                                                                
+        -1000        2578           6         256         218         111                                                            
+           46         -84         131         402        5106         121                                                            
+          -89          15       95221         -80           1       -2005                                                            
+          515          90          50          -1          19      172219                                                            
+        60205           3        7534      204914         141           0                                                            
+       606031        -419         999        9001      312909        -517                                                            
+            9          62          89         305         250         305                                                            
+          118           0        -999           2        6509          -5                                                            
+          177                                                                                                                        
+1                    List of odd numbers:                                                                                            
+          111         131         121         -89          15                                                                        
+        95221           1       -2005         515          -1                                                                        
+           19      172219       60205           3         141                                                                        
+       606031        -419         999        9001      312909                                                                        
+         -517           9          89         305         305                                                                        
+         -999        6509          -5         177                                                                                    
+0*** EXECUTION TIME =    0.002 SECS.      1643 INSTRUCTIONS EXECUTED -   821500 INSTRUCTIONS/SEC ***                                 
+0*** FIRST CARD NOT READ:       4444      8888                                                                                       
+0*** AM004 - NORMAL USER TERMINATION BY RETURN ***                                                                                   
+ !! END OF JES SPOOL FILE !!
