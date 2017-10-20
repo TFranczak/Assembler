@@ -1,1 +1,25 @@
-
+//KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Assignment 3 - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* Function: Read in numbers from file and 
+* build a table and then print out all 
+* of the numbers and all the odd numbers
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value in table
+*  7     Division
+*  8     Address of Outline variables
+*  9     Counter variable
+* 10     Keep copy of register
+* 11     Return Address
+* 15     Base register
+********************************************
