@@ -10,6 +10,7 @@
 * Function: Read in numbers from file and 
 * build a table and then print out all 
 * of the numbers and all the odd numbers
+* Searches through table for some numbers
 * 
 * MAIN
 * Register Usage
@@ -57,7 +58,7 @@ MAINSAVE DS    18F
 *
 * Function: Reads in numbers from an 
 * unknown file and builds a table of  
-* 55 numbers
+* 55 numbers. Uses -77777777 as delimiter
 * 
 * Register Usage
 *
@@ -229,46 +230,20 @@ NFNUM    DS    12C
          END   MAIN
 /*
 //FT05F001   DD  *
-1 -2005         515   90  50      -1   172219           60205                                   
+1 -2005         515   90  50      -1   172219           60205                                                           
+-777224                                                                                                                 
+3       7534    204914           141  0 606031    -419                                                                  
+218 111 46                                                                                                              
+9001  312909    -517  9 62  89  305   250 305                                                                           
+7845902       -311      -100001                                                                                         
+-999     2    6509    -5   177   42        777                                                                      
+                                                                                                                        
+345   -9009     65712                                                                                                   
 
-                        
--777224                                                                                         
-
-                        
-3       7534    204914           141  0 606031    -419                                          
-
-                        
-218 111 46                                                                                      
-
-                        
-9001  312909    -517  9 62  89  305   250 305                                                   
-
-                        
-7845902       -311      -100001                                                                 
-
-                        
--999     2    6509    -5   177   42        777                                                  
-
-                    
-                                                                                                
-
-                        
-345   -9009     65712                                                                           
-
-                        
-
-88442                                                                                           
-
-                        
--84                 131  5106  121  -89 15   95221 -80                                          
-
-                        
--5005005                                                                                        
-
-                        
--77777777                                                                                       
-
-                        
+88442                                                                                                                   
+-84                 131  5106  121  -89 15   95221 -80                                                                  
+-5005005                                                                                                                
+-77777777                                                                                                               
 -8033
 994 
 9001
@@ -279,3 +254,4 @@ NFNUM    DS    12C
 /*
 //FT06F001   DD SYSOUT=*
 //
+
