@@ -11,38 +11,46 @@
 * build a table and then print out all 
 * of the numbers and all the odd numbers
 * 
+* MAIN
 * Register Usage
 *
-*  4     Table Pointer
-*  5     EOT Pointer
-*  6     Value in table
-*  7     Division
-*  8     Address of Outline variables
-*  9     Counter variable
-* 10     Keep copy of register
+*  1     Parameter List
+* 12     Base register
 * 14     Return Address
-* 15     Base register
 ********************************************
 MAIN     CSECT
-         USING MAIN,15
-         LA    1,PLIST
-         L     15,=V(BUILD)
-         BALR  14,15
-         L     15,=V(PRINT)
-         BALR  14,15
-         L     15,=V(PRINTO)
-         BALR  14,15
+         STM   14,12,12(13)       Copy registers
+         LR    12,15              Load 12 as base register
+         USING MAIN,12            Use 12 as base register
+         LA    14,MAINSAVE        Load MAINSAVE into R14
+         ST    13,4(,14)          Link forward pointer
+         ST    14,8(,13)          Link backward pointer
+         LR    13,14              Load MAINSAVE
+         SPACE
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(BUILD)       Load virtual address of BUILD
+         BALR  14,15              Do BUILD subroutine
+         L     15,=V(PRINT)       Load virtual address of PRINT
+         BALR  14,15              Do PRINT subroutine
+         L     15,=V(SEARCH)      Load virtual address of SEARCH
+         BALR  14,15              Do SEARCH subroutine
+         SPACE
+         L     13,4(0,13)         
+         LM    14,12,12(13)       Load registers back
          BR    14
          LTORG                    Literal origin
-TABLE    DC    55F'-16'           Declare Table
+TABLE    DC    58F'-1'            Declare Table
 EOT      DS    F                  Declare End of Table
 TARGET   DS    F                  Number were searching for
 LOC      DS    F                  Location of element in table
+BUFFER   DS    80C                Declare Buffer
+         DC    C'*'               End for XDECI
 PLIST    DC    A(TABLE)           Parameter list
          DC    A(EOT)
+         DC    A(BUFFER)
          DC    A(TARGET)
          DC    A(LOC)
-         END   MAIN
+MAINSAVE DS    18F
 ********************************************
 * Build Subroutine
 *
@@ -57,38 +65,38 @@ PLIST    DC    A(TABLE)           Parameter list
 *  6     Value in table
 *  7     Division
 *  8     Address of Outline variables
-*  9     Counter variable
-* 11     Return Address
-* 15     Base register
+*  9     Address of buffer
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
 ********************************************
-CSECT    BUILD         
+BUILD    CSECT       
          STM   14,12,12(13)       Save registers
          LR    12,15              Load 12 as Base Register
-         USING PRINT,12          Use 12 as Base Register 
-         L     14,PRINTSV         Load PRINTSV into 14
-         ST    14,8(0,14)
+         USING BUILD,12           Use 12 as Base Register 
+         LA    14,BUILDSV         Load PRINTSV into 14
+         ST    14,8(0,14)         Link backward pointer
          ST    13,4(0,14)         Link forward pointer
-         LR    13,14              Load SEARCHSV
+         LR    13,14              Load BUILDSV
          LM    4,5,0(1)           Unload parameters
-         SR    9,9                Zero Register
-BLOOP1   XREAD BUFFER,80          Read line into buffer
+         L     9,8(1)             Load address of buffer
+BLOOP1   XREAD 0(0,9),80          Read line into buffer
          BC    B'0100',ENDBLP1    End of file?
-         XDECI 6,BUFFER           Read first number into R6
+         XDECI 6,0(0,9)           Read first number into R6
          B     DECIPHER           Branch into BLOOP2
 BLOOP2   XDECI 6,0(0,1)           Read next number into R6
 DECIPHER BC    B'0001',BLOOP1     At end of line?
+         C     6,=F'-77777777'    At delimiter?
+         BE    ENDBLP1            End loop
          ST    6,0(4)             Store number in table
          A     4,=F'4'            Increment table pointer
-         A     9,=F'1'            Increment number counter
-         C     9,=F'49'           If table is full?
-         BE    ENDBLP1            Stop reading
          B     BLOOP2             Back to BLOOP2
 ENDBLP1  ST    4,0(5)             Store end of table
-         LM    0,15,BRLIST        Load register list-TEST
-         BR    11                 Back to main
-BUFFER   DS    80C                Declare Buffer
-         DC    C'*'               End for XDECI
-BRLIST   DS    16F                Register list
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)        Reload registers
+         BR    14                 Branch back to MAIN
+         LTORG
+BUILDSV  DS    18F                Subroutine save
          SPACE
          SPACE
          SPACE
@@ -110,12 +118,12 @@ BRLIST   DS    16F                Register list
 * 13     Address of PRINTSV (save area)  
 * 14     Return Address
 ********************************************
-CSECT    PRINT 
+PRINT    CSECT 
          STM   14,12,12(13)       Save registers
          LR    12,15              Load 12 as Base Register
-         USING PRINT,12          Use 12 as Base Register 
-         L     14,PRINTSV         Load PRINTSV into 14
-         ST    14,8(0,14)
+         USING PRINT,12           Use 12 as Base Register 
+         LA    14,PRINTSV         Load PRINTSV into 14
+         ST    14,8(0,14)         Link backward pointer
          ST    13,4(0,14)         Link forward pointer
          LR    13,14              Load SEARCHSV
          LM    4,5,0(1)           Unload parameters
@@ -123,31 +131,32 @@ CSECT    PRINT
          SR    9,9                Zero loop counter
 PLOOP1   LA    8,NUMS             Load address of NUMS
          MVI   LINE,C' '          Clear LINE
-         MVC   LINE+1(72),LINE    Clear LINE
-PLOOP2   CR    5,4                EOT = Table Ptr?
+         MVC   LINE+1(84),LINE    Clear LINE
+PLOOP2   C     4,0(0,5)           EOT = Table Ptr?
          BE    ENDPLP             Go to ENDPLOOP
          L     6,0(0,4)           Load Table Value into R6
          XDECO 6,0(0,8)           Send num to NUMS
          A     4,=F'4'            Increment table pointer
          A     8,=F'12'           Increment NUMS pointer
          A     9,=F'1'            Increment Loop counter
-         C     9,=F'6'            6 on the line?
+         C     9,=F'7'            7 on the line?
          BE    PRNTLN             Go to print line
          B     PLOOP2             Again
-PRNTLN   XPRNT LINE,73            Print line
+PRNTLN   XPRNT LINE,85            Print line
          SR    9,9                Zero loop counter
          B     PLOOP1             Again
 ENDPLP   C     9,=F'0'            Is counter 0?
          BE    SKIPLAST           Skip last print
-         XPRNT LINE,73            Print last line from table
+         XPRNT LINE,85            Print last line from table
 SKIPLAST L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
+         LTORG
 HEADER   DC    C'1'               Format for header line - 37
          DC    20C' '
          DC    CL16'List of numbers:'
-LINE     DC    C'0'               Declare print line - 73
-NUMS     DS    6CL12              Declare array of nums
+LINE     DC    C'0'               Declare print line - 85
+NUMS     DS    7CL12              Declare array of nums
 PRINTSV  DS    18F                Create register save area
          SPACE
          SPACE
@@ -159,33 +168,80 @@ PRINTSV  DS    18F                Create register save area
 * 
 * Register Usage
 *
-*
-*
-*
-*
-*
-*
-*  
+*  2     Table pointer
+*  3     EoT Pointer
+*  4     Buffer
 * 12     Base register
 * 13     Address of SEARCHSV (save area)
 * 14     Return Address
 ******************************************** 
-CSECT    SEARCH
+SEARCH   CSECT
          STM   14,12,12(13)       Save registers
          LR    12,15              Load 12 as Base Register
          USING SEARCH,12          Use 12 as Base Register 
-         L     14,SEARCHSV        Load SEARCHSV into 14
-         ST    14,8(0,14)
+         LA    14,SEARCHSV        Load SEARCHSV into 14
+         ST    14,8(0,14)         Link backward pointer
          ST    13,4(0,14)         Link forward pointer
          LR    13,14              Load SEARCHSV
-         LM    2,5,0(1)           Unload parameters
-
+         LM    2,6,0(1)           Unload parameters
+*
+*                 
+*
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
          LTORG
 SEARCHSV DS    18F                Creates Save area for SEARCH
-         END   PRINTO
+         END   MAIN
 /*
-//FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW5DATA,DISP=SHR
+//FT05F001   DD  *
+1 -2005         515   90  50      -1   172219           60205                                    
+
+                       
+-777224                                                                                          
+
+                       
+3       7534    204914           141  0 606031    -419                                           
+
+                       
+218 111 46                                                                                       
+
+                       
+9001  312909    -517  9 62  89  305   250 305                                                    
+
+                       
+7845902       -311      -100001                                                                  
+
+                       
+-999     2    6509    -5   177   42        777                                                   
+
+                   
+                                                                                                 
+
+                       
+345   -9009     65712                                                                            
+
+                       
+
+88442                                                                                            
+
+                       
+-84                 131  5106  121  -89 15   95221 -80                                           
+
+                       
+-5005005                                                                                         
+
+                       
+-77777777                                                                                        
+
+                       
+-8033
+994 
+9001
+177               
+2
+321
+-419
+/*
+//FT06F001   DD SYSOUT=*
 //
