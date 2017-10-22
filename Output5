@@ -1,0 +1,372 @@
+                    J E S 2  J O B  L O G  --  S Y S T E M  S 0 W 1  --  N O D E  Z O S K C T R         
+
+ 
+19.01.21 JOB08337 ---- SUNDAY,    22 OCT 2017 ----
+19.01.21 JOB08337  IRR010I  USERID KC03I36  IS ASSIGNED TO THIS JOB.
+19.01.21 JOB08337  ICH70001I KC03I36  LAST ACCESS AT 19:01:19 ON SUNDAY, OCTOBER 22, 2017
+19.01.21 JOB08337  $HASP373 KC03I36A STARTED - INIT 2    - CLASS A        - SYS S0W1
+19.01.21 JOB08337  -                                         --TIMINGS (MINS.)--            ----PAGING COUNTS---
+19.01.21 JOB08337  -JOBNAME  STEPNAME PROCSTEP    RC   EXCP    TCB    SRB  CLOCK   SERV  PG   PAGE   SWAP    VIO SWAPS
+19.01.21 JOB08337  -KC03I36A                      00     50 ******    .00     .0    183   0      0      0      0     0
+19.01.21 JOB08337  -KC03I36A ENDED.  NAME-Tommy Franczak       TOTAL TCB CPU TIME=   .00  TOTAL ELAPSED TIME=    .0
+19.01.21 JOB08337  $HASP395 KC03I36A ENDED
+
+------ JES2 JOB STATISTICS ------
+
+
+  22 OCT 2017 JOB EXECUTION DATE
+
+
+          256 CARDS READ
+
+
+          319 SYSOUT PRINT RECORDS
+
+
+            0 SYSOUT PUNCH RECORDS
+
+
+           24 SYSOUT SPOOL KBYTES
+
+
+         0.00 MINUTES EXECUTION TIME
+!! END OF JES SPOOL FILE !!
+       1 //KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H                             JOB08337
+       2 //STEP1 EXEC PGM=ASSIST                                                         
+       3 //STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR                                
+       4 //SYSPRINT DD SYSOUT=*                                                          
+       5 //SYSIN DD *                                                                    
+       6 //FT05F001   DD  *                                                              
+       7 //FT06F001   DD SYSOUT=*                                                        
+       8 //                                                                              
+!! END OF JES SPOOL FILE !!
+ICH70001I KC03I36  LAST ACCESS AT 19:01:19 ON SUNDAY, OCTOBER 22, 2017
+IEF236I ALLOC. FOR KC03I36A STEP1
+IGD103I SMS ALLOCATED TO DDNAME STEPLIB
+IEF237I JES2 ALLOCATED TO SYSPRINT
+IEF237I JES2 ALLOCATED TO SYSIN
+IEF237I JES2 ALLOCATED TO FT05F001
+IEF237I JES2 ALLOCATED TO FT06F001
+IEF142I KC03I36A STEP1 - STEP WAS EXECUTED - COND CODE 0000
+IGD104I KC02293.ASSIST.LOADLIB                       RETAINED,  DDNAME=STEPLIB 
+IEF285I   KC03I36.KC03I36A.JOB08337.D0000103.?         SYSOUT        
+IEF285I   KC03I36.KC03I36A.JOB08337.D0000101.?         SYSIN         
+IEF285I   KC03I36.KC03I36A.JOB08337.D0000102.?         SYSIN         
+IEF285I   KC03I36.KC03I36A.JOB08337.D0000104.?         SYSOUT        
+IEF373I STEP/STEP1   /START 2017295.1901
+IEF032I STEP/STEP1   /STOP  2017295.1901 
+        CPU:     0 HR  00 MIN  00.01 SEC    SRB:     0 HR  00 MIN  00.00 SEC    
+        VIRT:   584K  SYS:   268K  EXT:        0K  SYS:    12076K
+        ATB- REAL:                     0K  SLOTS:                     0K
+             VIRT- ALLOC:       0M SHRD:       0M
+IEF375I  JOB/KC03I36A/START 2017295.1901
+IEF033I  JOB/KC03I36A/STOP  2017295.1901 
+        CPU:     0 HR  00 MIN  00.01 SEC    SRB:     0 HR  00 MIN  00.00 SEC    
+!! END OF JES SPOOL FILE !!
+
+*** ASSIST 4.0/A2-05/15/82  470/V7A/0:OS/VS2  INS=SDFP7/X=BGHO, CHECK/TRC/=1180, OPTS=CDKMPR FROM PENN ST*NIU COMPSCI*LT            
+
+                                                                                                                                    
+
+                                                                                                               PAGE    1            
+
+  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+                                      1 ********************************************                                                
+                                      2 * Assignment 5 - Pair Programmed                                                            
+                                      3 * Names: Tommy Franczak, Matt Rycraft                                                       
+                                      4 *                                                                                           
+                                      5 * Function: Read in numbers from file and                                                   
+                                      6 * build a table and then print out all                                                      
+                                      7 * of the numbers and all the odd numbers                                                    
+                                      8 * Searches through table for some numbers                                                   
+                                      9 *                                                                                           
+                                     10 * MAIN                                                                                      
+                                     11 * Register Usage                                                                            
+                                     12 *                                                                                           
+                                     13 *  1     Parameter List                                                                     
+                                     14 * 12     Base register                                                                      
+                                     15 * 13     Main save                                                                          
+                                     16 * 14     Return Address                                                                     
+                                     17 ********************************************                                                
+000000                               18 MAIN     CSECT                                                                              
+000000 90EC D00C            0000C    19          STM   14,12,12(13)       Copy registers                                            
+000004 18CF                          20          LR    12,15              Load 12 as base register                                  
+000000                               21          USING MAIN,12            Use 12 as base register                                   
+000006 41E0 C194            00194    22          LA    14,MAINSAVE        Load MAINSAVE into R14                                    
+00000A 50D0 E004            00004    23          ST    13,4(,14)          Link forward pointer                                      
+00000E 50E0 D008            00008    24          ST    14,8(,13)          Link backward pointer                                     
+000012 18DE                          25          LR    13,14              Load MAINSAVE                                             
+                                                                                                                                    
+000014 4110 C180            00180    27          LA    1,PLIST            Load PLIST into 1                                         
+000018 58F0 C038            00038    28          L     15,=V(BUILD)       Load virtual address of BUILD                             
+00001C 05EF                          29          BALR  14,15              Do BUILD subroutine                                       
+00001E 58F0 C03C            0003C    30          L     15,=V(PRINT)       Load virtual address of PRINT                             
+000022 05EF                          31          BALR  14,15              Do PRINT subroutine                                       
+000024 58F0 C040            00040    32          L     15,=V(SEARCH)      Load virtual address of SEARCH                            
+000028 05EF                          33          BALR  14,15              Do SEARCH subroutine                                      
+                                                                                                                                    
+00002A 58D0 D004            00004    35          L     13,4(0,13)         Load backward pointer                                     
+00002E 98EC D00C            0000C    36          LM    14,12,12(13)       Load registers back                                       
+000032 07FE                          37          BR    14                                                                           
+                                     38          LTORG                    Literal origin                                            
+000038 000001E0                      39                =V(BUILD)                                                                    
+00003C 00000288                      40                =V(PRINT)                                                                    
+000040 000003E0                      41                =V(SEARCH)                                                                   
+000044 FFFFFFFFFFFFFFFF              42 TABLE    DC    55F'-1'            Declare Table                                             
+000120                               43 EOT      DS    F                  Declare End of Table                                      
+000124                               44 TARGET   DS    F                  Number were searching for                                 
+000128                               45 LOC      DS    F                  Location of element in table                              
+00012C                               46 BUFFER   DS    80C                Declare Buffer                                            
+00017C 5C                            47          DC    C'*'               End for XDECI                                             
+000180 00000044                      48 PLIST    DC    A(TABLE)           Parameter list                                            
+000184 00000120                      49          DC    A(EOT)                                                                       
+000188 0000012C                      50          DC    A(BUFFER)                                                                    
+00018C 00000124                      51          DC    A(TARGET)                                                                    
+000190 00000128                      52          DC    A(LOC)                                                                       
+
+                                                                                                               PAGE    2            
+
+  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+000194                               53 MAINSAVE DS    18F                                                                          
+                                     54 ********************************************                                                
+                                     55 * Build Subroutine                                                                          
+                                     56 *                                                                                           
+                                     57 * Function: Reads in numbers from an                                                        
+                                     58 * unknown file and builds a table of                                                        
+                                     59 * 55 numbers. Uses -77777777 as delimiter                                                   
+                                     60 *                                                                                           
+                                     61 * Register Usage                                                                            
+                                     62 *                                                                                           
+                                     63 *  4     Table Pointer                                                                      
+                                     64 *  5     EOT Pointer                                                                        
+                                     65 *  6     Value in table                                                                     
+                                     66 *  7     Division                                                                           
+                                     67 *  8     Address of Outline variables                                                       
+                                     68 *  9     Address of buffer                                                                  
+                                     69 * 12     Base register                                                                      
+                                     70 * 13     Address of BUILDSV (save area)                                                     
+                                     71 * 14     Return Address                                                                     
+                                     72 ********************************************                                                
+0001E0                               73 BUILD    CSECT                                                                              
+0001E0 90EC D00C            0000C    74          STM   14,12,12(13)       Save registers                                            
+0001E4 18CF                          75          LR    12,15              Load 12 as Base Register                                  
+0001E0                               76          USING BUILD,12           Use 12 as Base Register                                   
+0001E6 41E0 C060            00240    77          LA    14,BUILDSV         Load PRINTSV into 14                                      
+0001EA 50E0 E008            00008    78          ST    14,8(0,14)         Link backward pointer                                     
+0001EE 50D0 E004            00004    79          ST    13,4(0,14)         Link forward pointer                                      
+0001F2 18DE                          80          LR    13,14              Load BUILDSV                                              
+0001F4 9845 1000            00000    81          LM    4,5,0(1)           Unload parameters                                         
+0001F8 5891 0008            00008    82          L     9,8(1)             Load address of buffer                                    
+0001FC E000 9000 0050 00000          83 BLOOP1   XREAD 0(0,9),80          Read line into buffer                                     
+000202 4740 C04A            0022A    84          BC    B'0100',ENDBLP1    End of file?                                              
+000206 5360 9000            00000    85          XDECI 6,0(0,9)           Read first number into R6                                 
+00020A 47F0 C032            00212    86          B     DECIPHER           Branch into BLOOP2                                        
+00020E 5360 1000            00000    87 BLOOP2   XDECI 6,0(0,1)           Read next number into R6                                  
+000212 4710 C01C            001FC    88 DECIPHER BC    B'0001',BLOOP1     At end of line?                                           
+000216 5960 C058            00238    89          C     6,=F'-77777777'    At delimiter?                                             
+00021A 4780 C04A            0022A    90          BE    ENDBLP1            End loop                                                  
+00021E 5064 0000            00000    91          ST    6,0(4)             Store number in table                                     
+000222 5A40 C05C            0023C    92          A     4,=F'4'            Increment table pointer                                   
+000226 47F0 C02E            0020E    93          B     BLOOP2             Back to BLOOP2                                            
+00022A 5045 0000            00000    94 ENDBLP1  ST    4,0(5)             Store end of table                                        
+00022E 58D0 D004            00004    95          L     13,4(0,13)         Load register list                                        
+000232 98EC D00C            0000C    96          LM    14,12,12(13)        Reload registers                                         
+000236 07FE                          97          BR    14                 Branch back to MAIN                                       
+                                     98          LTORG                                                                              
+000238 FB5D348F                      99                =F'-77777777'                                                                
+00023C 00000004                     100                =F'4'                                                                        
+000240                              101 BUILDSV  DS    18F                Subroutine save                                           
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                    105 ********************************************                                                
+                                    106 * Print Subroutine                                                                          
+                                    107 *                                                                                           
+                                    108 * Function: Prints 6 numbers to a line from                                                 
+                                    109 * the table until the EOT is found                                                          
+
+                                                                                                               PAGE    3            
+
+  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+                                    110 *                                                                                           
+                                    111 * Register Usage                                                                            
+                                    112 *                                                                                           
+                                    113 *  4     Table Pointer                                                                      
+                                    114 *  5     EOT Pointer                                                                        
+                                    115 *  6     Value in table                                                                     
+                                    116 *  7     Division                                                                           
+                                    117 *  8     Address of Outline variables                                                       
+                                    118 *  9     Counter variable                                                                   
+                                    119 * 12     Base register                                                                      
+                                    120 * 13     Address of PRINTSV (save area)                                                     
+                                    121 * 14     Return Address                                                                     
+                                    122 ********************************************                                                
+000288                              123 PRINT    CSECT                                                                              
+000288 90EC D00C            0000C   124          STM   14,12,12(13)       Save registers                                            
+00028C 18CF                         125          LR    12,15              Load 12 as Base Register                                  
+000288                              126          USING PRINT,12           Use 12 as Base Register                                   
+00028E 41E0 C110            00398   127          LA    14,PRINTSV         Load PRINTSV into 14                                      
+000292 50E0 E008            00008   128          ST    14,8(0,14)         Link backward pointer                                     
+000296 50D0 E004            00004   129          ST    13,4(0,14)         Link forward pointer                                      
+00029A 18DE                         130          LR    13,14              Load SEARCHSV                                             
+00029C 9845 1000            00000   131          LM    4,5,0(1)           Unload parameters                                         
+0002A0 E020 C094 0025 0031C         132          XPRNT HEADER,37          Print header line                                         
+0002A6 1B99                         133          SR    9,9                Zero loop counter                                         
+0002A8 4180 C0BA            00342   134 PLOOP1   LA    8,NUMS             Load address of NUMS                                      
+0002AC 9240 C0B9      00341         135          MVI   LINE,C' '          Clear LINE                                                
+0002B0 D253 C0BA C0B9 00342 00341   136          MVC   LINE+1(84),LINE    Clear LINE                                                
+0002B6 5940 5000            00000   137 PLOOP2   C     4,0(0,5)           EOT = Table Ptr?                                          
+0002BA 4780 C062            002EA   138          BE    ENDPLP             Go to ENDPLOOP                                            
+0002BE 5860 4000            00000   139          L     6,0(0,4)           Load Table Value into R6                                  
+0002C2 5260 8000            00000   140          XDECO 6,0(0,8)           Send num to NUMS                                          
+0002C6 5A40 C080            00308   141          A     4,=F'4'            Increment table pointer                                   
+0002CA 5A80 C084            0030C   142          A     8,=F'12'           Increment NUMS pointer                                    
+0002CE 5A90 C088            00310   143          A     9,=F'1'            Increment Loop counter                                    
+0002D2 5990 C08C            00314   144          C     9,=F'7'            7 on the line?                                            
+0002D6 4780 C056            002DE   145          BE    PRNTLN             Go to print line                                          
+0002DA 47F0 C02E            002B6   146          B     PLOOP2             Again                                                     
+0002DE E020 C0B9 0055 00341         147 PRNTLN   XPRNT LINE,85            Print line                                                
+0002E4 1B99                         148          SR    9,9                Zero loop counter                                         
+0002E6 47F0 C020            002A8   149          B     PLOOP1             Again                                                     
+0002EA 5990 C090            00318   150 ENDPLP   C     9,=F'0'            Is counter 0?                                             
+0002EE 4780 C070            002F8   151          BE    SKIPLAST           Skip last print                                           
+0002F2 E020 C0B9 0055 00341         152          XPRNT LINE,85            Print last line from table                                
+0002F8 58D0 D004            00004   153 SKIPLAST L     13,4(0,13)         Load register list                                        
+0002FC 98EC D00C            0000C   154          LM    14,12,12(13)       Reload registers                                          
+000300 07FE                         155          BR    14                 Branch back to MAIN                                       
+                                    156          LTORG                                                                              
+000308 00000004                     157                =F'4'                                                                        
+00030C 0000000C                     158                =F'12'                                                                       
+000310 00000001                     159                =F'1'                                                                        
+000314 00000007                     160                =F'7'                                                                        
+000318 00000000                     161                =F'0'                                                                        
+00031C F1                           162 HEADER   DC    C'1'               Format for header line - 37                               
+00031D 4040404040404040             163          DC    20C' '                                                                       
+000331 D389A2A340968640             164          DC    CL16'List of numbers:'                                                       
+000341 F0                           165 LINE     DC    C'0'               Declare print line - 85                                   
+000342                              166 NUMS     DS    7CL12              Declare array of nums                                     
+
+                                                                                                               PAGE    4            
+
+  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+000398                              167 PRINTSV  DS    18F                Create register save area                                 
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                    171 ********************************************                                                
+                                    172 * Search Subroutine                                                                         
+                                    173 *                                                                                           
+                                    174 * Function: Searches the table for an integer                                               
+                                    175 *                                                                                           
+                                    176 * Register Usage                                                                            
+                                    177 *                                                                                           
+                                    178 *  2     Table address                                                                      
+                                    179 *  3     EoT Pointer                                                                        
+                                    180 *  4     Buffer Pointer                                                                     
+                                    181 *  5     Target Pointer                                                                     
+                                    182 *  6     Location Pointer                                                                   
+                                    183 *  7     Number Read                                                                        
+                                    184 *  8     Table pointer (incrementing)                                                       
+                                    185 * 12     Base register                                                                      
+                                    186 * 13     Address of SEARCHSV (save area)                                                    
+                                    187 * 14     Return Address                                                                     
+                                    188 ********************************************                                                
+0003E0                              189 SEARCH   CSECT                                                                              
+0003E0 90EC D00C            0000C   190          STM   14,12,12(13)       Save registers                                            
+0003E4 18CF                         191          LR    12,15              Load 12 as Base Register                                  
+0003E0                              192          USING SEARCH,12          Use 12 as Base Register                                   
+0003E6 41E0 C074            00454   193          LA    14,SEARCHSV        Load SEARCHSV into 14                                     
+0003EA 50E0 E008            00008   194          ST    14,8(0,14)         Link backward pointer                                     
+0003EE 50D0 E004            00004   195          ST    13,4(0,14)         Link forward pointer                                      
+0003F2 18DE                         196          LR    13,14              Load SEARCHSV                                             
+0003F4 9826 1000            00000   197          LM    2,6,0(1)           Unload parameters                                         
+                                                                                                                                    
+0003F8 E020 C0BC 001F 0049C         199          XPRNT HEADR,31                                                                     
+0003FE E000 4000 0050 00000         200 LOOP     XREAD 0(0,4),80          Read 80 bytes into BUFFER                                 
+000404 4740 C066            00446   201          BC    B'0100',ENDLP      End of file?                                              
+000408 5370 4000            00000   202          XDECI 7,0(0,4)           Empty line?                                               
+00040C 4710 C01E            003FE   203          BC    B'0001',LOOP       Back to loop                                              
+000410 1882                         204          LR    8,2                'Zero' the table pointer                                  
+000412 5980 3000            00000   205 LOOP2    C     8,0(0,3)           At EoT?                                                   
+000416 4780 C058            00438   206          BE    NOTFOUND           Not found                                                 
+00041A 5970 8000            00000   207          C     7,0(0,8)           Found?                                                    
+00041E 4780 C04A            0042A   208          BE    FOUND              Found                                                     
+000422 5A80 C070            00450   209          A     8,=F'4'            Increment table pointer                                   
+000426 47F0 C032            00412   210          B     LOOP2              Back to inner loop                                        
+                                                                                                                                    
+00042A 5270 C0E4            004C4   212 FOUND    XDECO 7,FNUM             Send found num to line                                    
+00042E E020 C0DB 001F 004BB         213          XPRNT FOUNDOUT,31        Print the line                                            
+000434 47F0 C01E            003FE   214          B     LOOP               Check for next number                                     
+                                                                                                                                    
+000438 5270 C103            004E3   216 NOTFOUND XDECO 7,NFNUM            Send not found num to line                                
+00043C E020 C0FA 0023 004DA         217          XPRNT NFOUNDO,35         Print the line                                            
+000442 47F0 C01E            003FE   218          B     LOOP               Check for next number                                     
+                                                                                                                                    
+000446 58D0 D004            00004   220 ENDLP    L     13,4(0,13)         Load register list                                        
+00044A 98EC D00C            0000C   221          LM    14,12,12(13)       Reload registers                                          
+00044E 07FE                         222          BR    14                 Branch back to MAIN                                       
+                                    223          LTORG                                                                              
+
+                                                                                                               PAGE    5            
+
+  LOC  OBJECT CODE    ADDR1 ADDR2  STMT   SOURCE STATEMENT                                                                          
+000450 00000004                     224                =F'4'                                                                        
+000454                              225 SEARCHSV DS    18F                Creates Save area for SEARCH                              
+00049C 60                           226 HEADR    DC    C'-'               Creates a header line - 31                                
+00049D D985A2A493A3A240             227          DC    C'Results of searching the table'                                            
+0004BB 60                           228 FOUNDOUT DC    C'-'               Found print line - 31                                     
+0004BC E3C1D9C7C5E3407E             229          DC    C'TARGET ='                                                                  
+0004C4                              230 FNUM     DS    12C                                                                          
+0004D0 40A681A2408696A4             231          DC    C' was found'                                                                
+0004DA 60                           232 NFOUNDO  DC    C'-'               Not found print line - 35                                 
+0004DB E3C1D9C7C5E3407E             233          DC    C'TARGET ='                                                                  
+0004E3                              234 NFNUM    DS    12C                                                                          
+0004EF 40A681A2409596A3             235          DC    C' was not found'                                                            
+                                    236          END   MAIN                                                                         
+
+***  NO   STATEMENTS FLAGGED -  NO   WARNINGS,  NO   ERRORS                                                                         
+
+*** DYNAMIC CORE AREA USED:  LOW:   11208 HIGH:    1332 LEAVING:  481028 FREE BYTES. AVERAGE:       52 BYTES/STMT ***               
+
+*** ASSEMBLY TIME =    0.001 SECS,   237000 STATEMENTS/SEC ***                                                                      
+
+*** PROGRAM EXECUTION BEGINNING - ANY OUTPUT BEFORE EXECUTION TIME MESSAGE IS PRODUCED BY USER PROGRAM ***                          
+
+                    List of numbers:                                                                                                
+           1       -2005         515          90          50          -1      172219                                                
+       60205     -777224           3        7534      204914         141           0                                                
+      606031        -419         218         111          46        9001      312909                                                
+        -517           9          62          89         305         250         305                                                
+     7845902        -311     -100001        -999           2        6509          -5                                                
+         177          42         777         345       -9009       65712       88442                                                
+         -84         131        5106         121         -89          15       95221                                                
+         -80    -5005005                                                                                                            
+
+
+Results of searching the table                                                                                                      
+
+
+TARGET =       -8033 was not found                                                                                                  
+
+
+TARGET =         994 was not found                                                                                                  
+
+
+TARGET =        9001 was found                                                                                                      
+
+
+TARGET =         177 was found                                                                                                      
+
+
+TARGET =           2 was found                                                                                                      
+
+
+TARGET =         321 was not found                                                                                                  
+
+
+TARGET =        -419 was found                                                                                                      
+
+*** EXECUTION TIME =    0.002 SECS.      2637 INSTRUCTIONS EXECUTED -  1318500 INSTRUCTIONS/SEC ***                                 
+
+*** AM004 - NORMAL USER TERMINATION BY RETURN ***                                                                                   
+!! END OF JES SPOOL FILE !!
