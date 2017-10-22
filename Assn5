@@ -4,7 +4,7 @@
 //SYSPRINT DD SYSOUT=*
 //SYSIN DD *
 ********************************************
-* Assignment 3 - Pair Programmed
+* Assignment 5 - Pair Programmed
 * Names: Tommy Franczak, Matt Rycraft
 *
 * Function: Read in numbers from file and 
@@ -20,19 +20,29 @@
 *  8     Address of Outline variables
 *  9     Counter variable
 * 10     Keep copy of register
-* 11     Return Address
+* 14     Return Address
 * 15     Base register
 ********************************************
 MAIN     CSECT
          USING MAIN,15
          LA    1,PLIST
-         BAL   11,BUILD
-         BAL   11,PRINT
-         BAL   11,PRINTO
+         L     15,=V(BUILD)
+         BALR  14,15
+         L     15,=V(PRINT)
+         BALR  14,15
+         L     15,=V(PRINTO)
+         BALR  14,15
          BR    14
-         SPACE
-         SPACE
-         SPACE
+         LTORG                    Literal origin
+TABLE    DC    55F'-16'           Declare Table
+EOT      DS    F                  Declare End of Table
+TARGET   DS    F                  Number were searching for
+LOC      DS    F                  Location of element in table
+PLIST    DC    A(TABLE)           Parameter list
+         DC    A(EOT)
+         DC    A(TARGET)
+         DC    A(LOC)
+         END   MAIN
 ********************************************
 * Build Subroutine
 *
@@ -50,9 +60,16 @@ MAIN     CSECT
 *  9     Counter variable
 * 11     Return Address
 * 15     Base register
-********************************************         
-BUILD    STM   0,15,BRLIST        Copy registers
-         LM    4,5,0(1)           Unload PLIST into R4 and R5
+********************************************
+CSECT    BUILD         
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as Base Register
+         USING PRINT,12          Use 12 as Base Register 
+         L     14,PRINTSV         Load PRINTSV into 14
+         ST    14,8(0,14)
+         ST    13,4(0,14)         Link forward pointer
+         LR    13,14              Load SEARCHSV
+         LM    4,5,0(1)           Unload parameters
          SR    9,9                Zero Register
 BLOOP1   XREAD BUFFER,80          Read line into buffer
          BC    B'0100',ENDBLP1    End of file?
@@ -89,12 +106,20 @@ BRLIST   DS    16F                Register list
 *  7     Division
 *  8     Address of Outline variables
 *  9     Counter variable
-* 11     Return Address
-* 15     Base register
-******************************************** 
-PRINT    STM   0,15,PRLIST        Store register copies
+* 12     Base register
+* 13     Address of PRINTSV (save area)  
+* 14     Return Address
+********************************************
+CSECT    PRINT 
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as Base Register
+         USING PRINT,12          Use 12 as Base Register 
+         L     14,PRINTSV         Load PRINTSV into 14
+         ST    14,8(0,14)
+         ST    13,4(0,14)         Link forward pointer
+         LR    13,14              Load SEARCHSV
+         LM    4,5,0(1)           Unload parameters
          XPRNT HEADER,37          Print header line
-         LM    4,5,0(1)           Unload PLIST into R4 and R5
          SR    9,9                Zero loop counter
 PLOOP1   LA    8,NUMS             Load address of NUMS
          MVI   LINE,C' '          Clear LINE
@@ -112,81 +137,55 @@ PLOOP2   CR    5,4                EOT = Table Ptr?
 PRNTLN   XPRNT LINE,73            Print line
          SR    9,9                Zero loop counter
          B     PLOOP1             Again
-ENDPLP   C     9,=F'0'             Is counter 0?
+ENDPLP   C     9,=F'0'            Is counter 0?
          BE    SKIPLAST           Skip last print
          XPRNT LINE,73            Print last line from table
-SKIPLAST LM    0,15,PRLIST        Load copy of registers
-         BR    11                 Branch back into main
+SKIPLAST L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
 HEADER   DC    C'1'               Format for header line - 37
          DC    20C' '
          DC    CL16'List of numbers:'
 LINE     DC    C'0'               Declare print line - 73
 NUMS     DS    6CL12              Declare array of nums
-PRLIST   DS    16F                Register copy
+PRINTSV  DS    18F                Create register save area
          SPACE
          SPACE
          SPACE
 ********************************************
-* Build Subroutine
+* Search Subroutine
 *
-* Function: Prints 5 numbers to a line from
-* the table, and only prints the odd numbers 
-* within the table 
+* Function: Searches the table for an integer 
 * 
 * Register Usage
 *
-*  4     Table Pointer
-*  5     EOT Pointer
-*  6     Value in table
-*  7     Division
-*  8     Address of Outline variables
-*  9     Counter variable
-* 10     Keep copy of register
-* 11     Return Address
-* 15     Base register
+*
+*
+*
+*
+*
+*
+*  
+* 12     Base register
+* 13     Address of SEARCHSV (save area)
+* 14     Return Address
 ******************************************** 
-PRINTO   STM   0,15,ORLIST        Save copy of registers
-         XPRNT OHEADER,41         Print odd header
-         LM    4,5,0(1)           Unload PLIST into R4 and R5
-         SR    9,9                Zero loop counter
-OLOOP    LA    8,ONUM             Load address of nums 
-         MVI   OLINE,C' '         Clear LINE
-         MVC   OLINE+1(60),OLINE  Clear LINE
-OLOOP2   CR    5,4                EOT?    
-         BE    ENDOLP             got to ENDOLP
-         L     7,0(0,4)           load table value into R7
-         LR    10,7               Copy 7 into 10
-         A     4,=F'4'            Increment table pointer
-         M     6,=F'1'            Create 64-bit num
-         D     6,=F'2'            Divide by 2
-         C     6,=F'0'            Is remainder 0?
-         BE    OLOOP2             Branch to OLOOP2
-         XDECO 10,0(0,8)          send numbers to ONUM
-         A     8,=F'12'           increment ONUM pointer
-         A     9,=F'1'            increment loop counter
-         C     9,=F'5'            is counter 5?
-         BE    PRNTLNO            Print the line
-         B     OLOOP2             OLLOP2 Again
-PRNTLNO  XPRNT OLINE,61           Print line
-         SR    9,9                Zero Counter
-         B     OLOOP              OLOOP again
-ENDOLP   C     9,=F'0'            Is counter 0?
-         BE    SKIPLSTO           Skip last print
-         XPRNT OLINE,61           Print line
-SKIPLSTO LM    0,15,ORLIST        Load copy of registers
-         BR    11                 Branch back to main
-OHEADER  DC    C'1'               Format for header line - 41
-         DC    20C' '
-         DC    CL20'List of odd numbers:'  
-OLINE    DC    C'0'               Declare outline
-ONUM     DS    5CL12              Declare array of Odd Numbers
-ORLIST   DS    16F   
-         LTORG                    Literal origin
-TABLE    DC    49F'-16'           Declare Table
-EOT      DS    F                  Declare End of Table
-PLIST    DC    A(TABLE)           Parameter list
-         DC    A(EOT)
-         END   MAIN
+CSECT    SEARCH
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as Base Register
+         USING SEARCH,12          Use 12 as Base Register 
+         L     14,SEARCHSV        Load SEARCHSV into 14
+         ST    14,8(0,14)
+         ST    13,4(0,14)         Link forward pointer
+         LR    13,14              Load SEARCHSV
+         LM    2,5,0(1)           Unload parameters
+
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+         LTORG
+SEARCHSV DS    18F                Creates Save area for SEARCH
+         END   PRINTO
 /*
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW5DATA,DISP=SHR
 //
