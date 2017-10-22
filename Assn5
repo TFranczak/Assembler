@@ -16,6 +16,7 @@
 *
 *  1     Parameter List
 * 12     Base register
+* 13     Main save
 * 14     Return Address
 ********************************************
 MAIN     CSECT
@@ -35,7 +36,7 @@ MAIN     CSECT
          L     15,=V(SEARCH)      Load virtual address of SEARCH
          BALR  14,15              Do SEARCH subroutine
          SPACE
-         L     13,4(0,13)         
+         L     13,4(0,13)         Load backward pointer
          LM    14,12,12(13)       Load registers back
          BR    14
          LTORG                    Literal origin
@@ -168,9 +169,13 @@ PRINTSV  DS    18F                Create register save area
 * 
 * Register Usage
 *
-*  2     Table pointer
+*  2     Table address
 *  3     EoT Pointer
-*  4     Buffer
+*  4     Buffer Pointer
+*  5     Target Pointer
+*  6     Location Pointer
+*  7     Number Read
+*  8     Table pointer (incrementing)
 * 12     Base register
 * 13     Address of SEARCHSV (save area)
 * 14     Return Address
@@ -184,14 +189,40 @@ SEARCH   CSECT
          ST    13,4(0,14)         Link forward pointer
          LR    13,14              Load SEARCHSV
          LM    2,6,0(1)           Unload parameters
-*
-*                 
-*
-         L     13,4(0,13)         Load register list
+         SPACE
+LOOP     XREAD 0(0,4),80          Read 80 bytes into BUFFER
+         BC    B'0100',ENDLP      End of file?
+         XDECI 7,0(0,4)           Empty line?
+         BC    B'0001',LOOP       Back to loop
+         LR    8,2                'Zero' the table pointer
+LOOP2    C     8,0(0,3)             At EoT?
+         BE    NOTFOUND           Not found
+         C     7,0(0,8)           Found?
+         BE    FOUND              Found           
+         A     8,=F'4'            Increment table pointer
+         B     LOOP2              Back to inner loop
+         SPACE
+FOUND    XDECO 7,FNUM             Send found num to line
+         XPRNT FOUNDOUT,31        Print the line
+         B     LOOP               Check for next number
+         SPACE
+NOTFOUND XDECO 7,NFNUM            Send not found num to line
+         XPRNT NFOUNDO,35         Print the line
+         B     LOOP               Check for next number
+         SPACE
+ENDLP    L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
          LTORG
 SEARCHSV DS    18F                Creates Save area for SEARCH
+FOUNDOUT DC    C'-'               Found print line - 31 
+         DC    C'TARGET ='
+FNUM     DS    12C
+         DC    C' was found'
+NFOUNDO  DC    C'-'               Not found print line - 35
+         DC    C'TARGET ='
+NFNUM    DS    12C
+         DC    C' was not found'    
          END   MAIN
 /*
 //FT05F001   DD  *
