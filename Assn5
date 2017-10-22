@@ -9,9 +9,7 @@
 *
 * Function: Read in numbers from file and 
 * build a table and then print out all 
-* of the numbers and then search for 
-* specific numbers and print out if
-* they are found or not
+* of the numbers and all the odd numbers
 * 
 * MAIN
 * Register Usage
@@ -42,7 +40,7 @@ MAIN     CSECT
          LM    14,12,12(13)       Load registers back
          BR    14
          LTORG                    Literal origin
-TABLE    DC    58F'-1'            Declare Table
+TABLE    DC    55F'-1'            Declare Table
 EOT      DS    F                  Declare End of Table
 TARGET   DS    F                  Number were searching for
 LOC      DS    F                  Location of element in table
@@ -59,7 +57,7 @@ MAINSAVE DS    18F
 *
 * Function: Reads in numbers from an 
 * unknown file and builds a table of  
-* 49 numbers
+* 55 numbers
 * 
 * Register Usage
 *
@@ -96,7 +94,7 @@ DECIPHER BC    B'0001',BLOOP1     At end of line?
          B     BLOOP2             Back to BLOOP2
 ENDBLP1  ST    4,0(5)             Store end of table
          L     13,4(0,13)         Load register list
-         LM    14,12,12(13)       Reload registers
+         LM    14,12,12(13)        Reload registers
          BR    14                 Branch back to MAIN
          LTORG
 BUILDSV  DS    18F                Subroutine save
@@ -192,6 +190,7 @@ SEARCH   CSECT
          LR    13,14              Load SEARCHSV
          LM    2,6,0(1)           Unload parameters
          SPACE
+         XPRNT HEADR,31
 LOOP     XREAD 0(0,4),80          Read 80 bytes into BUFFER
          BC    B'0100',ENDLP      End of file?
          XDECI 7,0(0,4)           Empty line?
@@ -217,6 +216,8 @@ ENDLP    L     13,4(0,13)         Load register list
          BR    14                 Branch back to MAIN
          LTORG
 SEARCHSV DS    18F                Creates Save area for SEARCH
+HEADR    DC    C'-'               Creates a header line - 31
+         DC    C'Results of searching the table'
 FOUNDOUT DC    C'-'               Found print line - 31 
          DC    C'TARGET ='
 FNUM     DS    12C
@@ -228,46 +229,46 @@ NFNUM    DS    12C
          END   MAIN
 /*
 //FT05F001   DD  *
-1 -2005         515   90  50      -1   172219           60205                                    
+1 -2005         515   90  50      -1   172219           60205                                   
 
-                       
--777224                                                                                          
+                        
+-777224                                                                                         
 
-                       
-3       7534    204914           141  0 606031    -419                                           
+                        
+3       7534    204914           141  0 606031    -419                                          
 
-                       
-218 111 46                                                                                       
+                        
+218 111 46                                                                                      
 
-                       
-9001  312909    -517  9 62  89  305   250 305                                                    
+                        
+9001  312909    -517  9 62  89  305   250 305                                                   
 
-                       
-7845902       -311      -100001                                                                  
+                        
+7845902       -311      -100001                                                                 
 
-                       
--999     2    6509    -5   177   42        777                                                   
+                        
+-999     2    6509    -5   177   42        777                                                  
 
-                   
-                                                                                                 
+                    
+                                                                                                
 
-                       
-345   -9009     65712                                                                            
+                        
+345   -9009     65712                                                                           
 
-                       
+                        
 
-88442                                                                                            
+88442                                                                                           
 
-                       
--84                 131  5106  121  -89 15   95221 -80                                           
+                        
+-84                 131  5106  121  -89 15   95221 -80                                          
 
-                       
--5005005                                                                                         
+                        
+-5005005                                                                                        
 
-                       
--77777777                                                                                        
+                        
+-77777777                                                                                       
 
-                       
+                        
 -8033
 994 
 9001
