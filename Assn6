@@ -29,16 +29,12 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(BUILD)       Load virtual address of BUILD
          BALR  14,15              Do BUILD subroutine
-         L     15,=V(PRINT)       Load virtual address of PRINT
-         BALR  14,15              Do PRINT subroutine
-         L     15,=V(SEARCH)      Load virtual address of SEARCH
-         BALR  14,15              Do SEARCH subroutine
          SPACE
          L     13,4(0,13)         Load backward pointer
          LM    14,12,12(13)       Load registers back
          BR    14
          LTORG                    Literal origin
-TABLE    DC    55F'-1'            Declare Table
+TABLE    DC    40F'-1'            Declare Table
 EOT      DS    F                  Declare End of Table
 TARGET   DS    F                  Number were searching for
 LOC      DS    F                  Location of element in table
@@ -55,14 +51,15 @@ MAINSAVE DS    18F
 *
 * Function: Reads in numbers from an 
 * unknown file and builds a table of  
-* 55 numbers. Uses -77777777 as delimiter
+* 40 fullwords. Firstname(10 characters),
+* Lastname(10 characters), ID Num (8 characters)
+* Account Balance (4 Characters)
 * 
 * Register Usage
 *
 *  4     Table Pointer
 *  5     EOT Pointer
 *  6     Value in table
-*  7     Division
 *  8     Address of Outline variables
 *  9     Address of buffer
 * 12     Base register
@@ -85,14 +82,14 @@ BLOOP1   XREAD 0(0,9),80          Read line into buffer
          B     DECIPHER           Branch into BLOOP2
 BLOOP2   XDECI 6,0(0,1)           Read next number into R6
 DECIPHER BC    B'0001',BLOOP1     At end of line?
-         C     6,=F'-77777777'    At delimiter?
+         C     6,=F'DONOTPUT'     At delimiter?
          BE    ENDBLP1            End loop
          ST    6,0(4)             Store number in table
          A     4,=F'4'            Increment table pointer
          B     BLOOP2             Back to BLOOP2
 ENDBLP1  ST    4,0(5)             Store end of table
          L     13,4(0,13)         Load register list
-         LM    14,12,12(13)        Reload registers
+         LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
          LTORG
 BUILDSV  DS    18F                Subroutine save
