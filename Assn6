@@ -1,0 +1,19 @@
+//KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Assignment 5 - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* Function: 
+* 
+* MAIN
+* Register Usage
+*
+*  1     Parameter List
+* 12     Base register
+* 13     Main save
+* 14     Return Address
+********************************************
