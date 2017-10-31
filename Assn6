@@ -96,3 +96,63 @@ BUILDSV  DS    18F                Subroutine save
          SPACE
          SPACE
          SPACE
+********************************************
+* Print Subroutine
+*
+* Function: 
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value in table
+*  7     Division
+*  8     Address of Outline variables
+*  9     Counter variable
+* 12     Base register
+* 13     Address of PRINTSV (save area)  
+* 14     Return Address
+********************************************
+PRINT    CSECT 
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as Base Register
+         USING PRINT,12           Use 12 as Base Register 
+         LA    14,PRINTSV         Load PRINTSV into 14
+         ST    14,8(0,14)         Link backward pointer
+         ST    13,4(0,14)         Link forward pointer
+         LR    13,14              Load SEARCHSV
+         LM    4,5,0(1)           Unload parameters
+         XPRNT HEADER,37          Print header line
+         SR    9,9                Zero loop counter
+PLOOP1   LA    8,NUMS             Load address of NUMS
+         MVI   LINE,C' '          Clear LINE
+         MVC   LINE+1(84),LINE    Clear LINE
+PLOOP2   C     4,0(0,5)           EOT = Table Ptr?
+         BE    ENDPLP             Go to ENDPLOOP
+         L     6,0(0,4)           Load Table Value into R6
+         XDECO 6,0(0,8)           Send num to NUMS
+         A     4,=F'4'            Increment table pointer
+         A     8,=F'12'           Increment NUMS pointer
+         A     9,=F'1'            Increment Loop counter
+         C     9,=F'7'            7 on the line?
+         BE    PRNTLN             Go to print line
+         B     PLOOP2             Again
+PRNTLN   XPRNT LINE,85            Print line
+         SR    9,9                Zero loop counter
+         B     PLOOP1             Again
+ENDPLP   C     9,=F'0'            Is counter 0?
+         BE    SKIPLAST           Skip last print
+         XPRNT LINE,85            Print last line from table
+SKIPLAST L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+         LTORG
+HEADER   DC    C'1'               Format for header line - 37
+         DC    30C' '
+         DC    CL16'Odds and Ends Customer Data'
+LINE     DC    C'0'               Declare print line - 85
+
+PRINTSV  DS    18F                Create register save area
+         SPACE
+         SPACE
+         SPACE
