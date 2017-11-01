@@ -29,22 +29,31 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(BUILD)       Load virtual address of BUILD
          BALR  14,15              Do BUILD subroutine
+         XDUMP TABLE,1280
+         SPACE
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(PRINT)       Load virtual address of PRINT
+         BALR  14,15              Do PRINT subroutine
          SPACE
          L     13,4(0,13)         Load backward pointer
          LM    14,12,12(13)       Load registers back
          BR    14
          LTORG                    Literal origin
-TABLE    DS    40CL32              Declare Entry Table
+         ORG MAIN+((*-MAIN+31)/32)*32
+TABLE    DS    40CL32             Declare Entry Table
 EOT      DS    F                  Declare End of Table
-TARGET   DS    F                  Number were searching for
-LOC      DS    F                  Location of element in table
+CAPTION  DC    C'1'               Caption for PRINT - 80
+         DC    22C' '
+         DC    C'Odds and Ends Customer Data'
+         DC    22C' '
+         DC    C'Page    '
+PAGENUM  DC    PL2'1'             Declares pagenum
 BUFFER   DS    80C                Declare Buffer
          DC    C'*'               End for XDECI
 PLIST    DC    A(TABLE)           Parameter list
          DC    A(EOT)
          DC    A(BUFFER)
-         DC    A(TARGET)
-         DC    A(LOC)
+         DC    A(CAPTION)
 MAINSAVE DS    18F
 ENTRY    DSECT                    Dummy section for table
 FNAME    DS    CL10               First name = 10 characters
@@ -64,7 +73,6 @@ ACCBAL   DS    PL4                Account Bal = 4 packed nums
 *
 *  4     Table Pointer
 *  5     EOT Pointer
-*  6     Value in table
 *  8     Address of Outline variables
 *  9     Address of buffer
 * 12     Base register
@@ -83,17 +91,16 @@ BUILD    CSECT
          LM    4,5,0(1)           Unload parameters
          L     9,8(1)             Load address of buffer
 BLOOP1   XREAD 0(0,9),80          Read line into buffer
-         BC    B'0100',ENDBLP1    End of file? End loop
-         CLC   0(8,9),=C'DONOTPUT' At delimiter?
+         CLC   0(8,9),=CL8'DONOTPUT' At delimiter?
          BE    ENDBLP1            End loop
-         MVC   LNAME(10),0(9)   Grab LNAME from buffer
-         MVC   FNAME(10),12(9)  Grab FNAME from buffer
-         MVC   IDNUM(8),24(9)  Grab IDNAME from buffer
-         MVC   ACCBAL(7),34(9)  Grab ACCBAL from buffer
-         CLC   0(1,9),=C'+'       + number on line?
+         MVC   LNAME(10),0(9)     Grab LNAME from buffer
+         MVC   FNAME(10),12(9)    Grab FNAME from buffer
+         MVC   IDNUM(8),24(9)     Grab IDNAME from buffer
+         PACK  ACCBAL(4),34(7,9)  Grab ACCBAL from buffer
+         CLC   41(1,9),=C'+'      + number on line?
          BE    POS                Go to pos
          MP    ACCBAL,=P'-1'      Negate number in table
-POS      A     4,=F'32'           Increment table pointer
+POS      LA    4,32(0,4)          Increment table pointer
          B     BLOOP1             Back to BLOOP1
 ENDBLP1  ST    4,0(5)             Store end of table
          L     13,4(0,13)         Load register list
@@ -111,10 +118,11 @@ BUILDSV  DS    18F                Subroutine save
 * 
 * Register Usage
 *
+*  1     Address of $
 *  4     Table Pointer
 *  5     EOT Pointer
-*  6     Value in table
-*  7     Division
+*  6     Address of CAPTION
+*  7     Address of pagecount
 *  8     Address of Outline variables
 *  9     Counter variable
 * 12     Base register
@@ -129,36 +137,54 @@ PRINT    CSECT
          ST    14,8(0,14)         Link backward pointer
          ST    13,4(0,14)         Link forward pointer
          LR    13,14              Load SEARCHSV
-         LM    4,5,0(1)           Unload parameters
-         XPRNT HEADER,37          Print header line
+         USING ENTRY,4
+         LM    4,7,0(1)           Unload parameters
+PLOOP1   MVC   78(2,6),0(7)       Append proper page num
+         XPRNT 0(7),80            Print CAPTION line
+         XPRNT HEADER,76          Print HEADER line
          SR    9,9                Zero loop counter
-*PLOOP1   LA    8,NUMS             Load address of NUMS
-PLOOP1   MVI   LINE+1,C' '        Clear LINE
-         MVC   LINE+1(84),LINE    Clear LINE
-PLOOP2   C     4,0(0,5)           EOT = Table Ptr?
-         BE    ENDPLP             Go to ENDPLOOP
-         L     6,0(0,4)           Load Table Value into R6
-         XDECO 6,0(0,8)           Send num to NUMS
+*
+PLOOP2   MVI   LINE+1,C' '        Clear LINE
+         MVC   LINE+1(84),LINE+1  Clear LINE
+         C     4,0(0,5)           EOT = Table Ptr?
+         BE    ENDPLOOP           Go to ENDPLOOP
+         MVC   FNAME1(10),FNAME   Put FNAME on line
+         MVC   LNAME1(10),LNAME   Put LNAME on line
+         MVC   IDNUM(8),IDNUM     Put IDNUM on line
+         LA    1,ACCBAL1+5        Set default place for $
+         CP    ACCBAL(4),=P'0'   Is bal >= 0?
+         BC    B'1010',BALPOS     Skip to BALPOS
+         MVC   ACCBAL1(13),=X'404020202021204B202040C3D9'
+         B     ENDN               Merge back with pos
+BALPOS   MVC   ACCBAL1(13),=X'404020202021204B2020404040'
+ENDN     EDMK  ACCBAL1(13),ACCBAL Put ACCBAL on line
+         MVI   0(1),C'$'
+         XPRNT LINE,80
          A     4,=F'4'            Increment table pointer
-         A     8,=F'12'           Increment NUMS pointer
          A     9,=F'1'            Increment Loop counter
          C     9,=F'7'            7 on the line?
-         BE    PRNTLN             Go to print line
          B     PLOOP2             Again
-PRNTLN   XPRNT LINE,85            Print line
-         SR    9,9                Zero loop counter
-         B     PLOOP1             Again
-ENDPLP   C     9,=F'0'            Is counter 0?
-         BE    SKIPLAST           Skip last print
-         XPRNT LINE,85            Print last line from table
-SKIPLAST L     13,4(0,13)         Load register list
+*
+ENDPLOOP L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
          LTORG
-HEADER   DC    C'1'               Format for header line - 37
-         DC    30C' '
-         DC    CL16'Odds and Ends Customer Data'
-LINE     DC    C'0'               Declare print line - 85
+HEADER   DC    C'-'               Format for header line - 76
+         DC    C'First Name'
+         DC    11C' '
+         DC    C'Last Name'
+         DC    13C' '
+         DC    C'ID Number'
+         DC    16C' '
+         DC    C'Balance'
+LINE     DC    C'0'               Declare print line - 79
+FNAME1   DS    10C
+         DC    11C' '
+LNAME1   DS    10C
+         DC    12C' '         
+IDNUM1   DS    8C
+         DC    15C' '
+ACCBAL1  DS    12C
 PRINTSV  DS    18F                Create register save area
          SPACE
          SPACE
@@ -181,3 +207,4 @@ PRINTSV  DS    18F                Create register save area
 * 14     Return Address
 ********************************************
          END
+//FT05F001  DD  DSN=KC02314.SPRING17.CSCI360.HW6DATA,DISP=SHR
