@@ -34,7 +34,7 @@ MAIN     CSECT
          LM    14,12,12(13)       Load registers back
          BR    14
          LTORG                    Literal origin
-TABLE    DC    40F'-1'            Declare Table
+TABLE    DS    40CL32              Declare Entry Table
 EOT      DS    F                  Declare End of Table
 TARGET   DS    F                  Number were searching for
 LOC      DS    F                  Location of element in table
@@ -46,6 +46,11 @@ PLIST    DC    A(TABLE)           Parameter list
          DC    A(TARGET)
          DC    A(LOC)
 MAINSAVE DS    18F
+ENTRY    DSECT                    Dummy section for table
+FNAME    DS    CL10               First name = 10 characters
+LNAME    DS    CL10               Last name = 10 characters
+IDNUM    DS    CL8                ID Number = 8 characters
+ACCBAL   DS    PL4                Account Bal = 4 packed nums
 ********************************************
 * Build Subroutine
 *
@@ -74,19 +79,22 @@ BUILD    CSECT
          ST    14,8(0,14)         Link backward pointer
          ST    13,4(0,14)         Link forward pointer
          LR    13,14              Load BUILDSV
+         USING ENTRY,4
          LM    4,5,0(1)           Unload parameters
          L     9,8(1)             Load address of buffer
 BLOOP1   XREAD 0(0,9),80          Read line into buffer
-         BC    B'0100',ENDBLP1    End of file?
-         XDECI 6,0(0,9)           Read first number into R6
-         B     DECIPHER           Branch into BLOOP2
-BLOOP2   XDECI 6,0(0,1)           Read next number into R6
-DECIPHER BC    B'0001',BLOOP1     At end of line?
-         C     6,=F'DONOTPUT'     At delimiter?
+         BC    B'0100',ENDBLP1    End of file? End loop
+         CLC   0(8,9),=C'DONOTPUT' At delimiter?
          BE    ENDBLP1            End loop
-         ST    6,0(4)             Store number in table
-         A     4,=F'4'            Increment table pointer
-         B     BLOOP2             Back to BLOOP2
+         MVC   LNAME(10),0(9)   Grab LNAME from buffer
+         MVC   FNAME(10),12(9)  Grab FNAME from buffer
+         MVC   IDNUM(8),24(9)  Grab IDNAME from buffer
+         MVC   ACCBAL(7),34(9)  Grab ACCBAL from buffer
+         CLC   0(1,9),=C'+'       + number on line?
+         BE    POS                Go to pos
+         MP    ACCBAL,=P'-1'      Negate number in table
+POS      A     4,=F'32'           Increment table pointer
+         B     BLOOP1             Back to BLOOP1
 ENDBLP1  ST    4,0(5)             Store end of table
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
@@ -99,7 +107,7 @@ BUILDSV  DS    18F                Subroutine save
 ********************************************
 * Print Subroutine
 *
-* Function: 
+* Function: Print the table.
 * 
 * Register Usage
 *
@@ -124,8 +132,8 @@ PRINT    CSECT
          LM    4,5,0(1)           Unload parameters
          XPRNT HEADER,37          Print header line
          SR    9,9                Zero loop counter
-PLOOP1   LA    8,NUMS             Load address of NUMS
-         MVI   LINE,C' '          Clear LINE
+*PLOOP1   LA    8,NUMS             Load address of NUMS
+PLOOP1   MVI   LINE+1,C' '        Clear LINE
          MVC   LINE+1(84),LINE    Clear LINE
 PLOOP2   C     4,0(0,5)           EOT = Table Ptr?
          BE    ENDPLP             Go to ENDPLOOP
@@ -151,8 +159,25 @@ HEADER   DC    C'1'               Format for header line - 37
          DC    30C' '
          DC    CL16'Odds and Ends Customer Data'
 LINE     DC    C'0'               Declare print line - 85
-
 PRINTSV  DS    18F                Create register save area
          SPACE
          SPACE
          SPACE
+********************************************
+* Trans Subroutine
+*
+* Function: 
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Value in table
+*  7     Division
+*  8     Address of Outline variables
+*  9     Counter variable
+* 12     Base register
+* 13     Address of PRINTSV (save area)  
+* 14     Return Address
+********************************************
+         END
