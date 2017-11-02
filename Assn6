@@ -148,13 +148,13 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          MVC   LINE+1(84),LINE+1  Clear LINE
          C     4,0(0,5)           EOT = Table Ptr?
          BE    ENDPLOOP           Go to ENDPLOOP
-         MVC   FNAME1(10),FNAME   Put FNAME on line
-         MVC   LNAME1(10),LNAME   Put LNAME on line
-         MVC   IDNUM(8),IDNUM     Put IDNUM on line
+         MVC   FNAME1+10(10),FNAME   Put FNAME on line
+         MVC   LNAME1+10(10),LNAME   Put LNAME on line
+         MVC   IDNUM+10(8),IDNUM     Put IDNUM on line
          LA    1,ACCBAL1+5        Set default place for $
          CP    ACCBAL(4),=P'0'   Is bal >= 0?
          BC    B'1010',BALPOS     Skip to BALPOS
-         MVC   ACCBAL1(13),=X'404020202021204B202040C3D9'
+         MVC   ACCBAL1+10(13),=X'404020202021204B202040C3D9'
          B     ENDN               Merge back with pos
 BALPOS   MVC   ACCBAL1(13),=X'404020202021204B2020404040'
 ENDN     EDMK  ACCBAL1(13),ACCBAL Put ACCBAL on line
