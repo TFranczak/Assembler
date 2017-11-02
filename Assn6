@@ -145,25 +145,26 @@ PLOOP1   MVC   78(2,6),0(7)       Append proper page num
          SR    9,9                Zero loop counter
 *
 PLOOP2   MVI   LINE+1,C' '        Clear LINE
-         MVC   LINE+1(84),LINE+1  Clear LINE
+         MVC   LINE+1(78),LINE+1  Clear LINE
          C     4,0(0,5)           EOT = Table Ptr?
          BE    ENDPLOOP           Go to ENDPLOOP
          MVC   FNAME1(10),FNAME   Put FNAME on line
          MVC   LNAME1(10),LNAME   Put LNAME on line
-         MVC   IDNUM(8),IDNUM     Put IDNUM on line
-         LA    1,ACCBAL1+5        Set default place for $
-         CP    ACCBAL(4),=P'0'   Is bal >= 0?
+         MVC   IDNUM1(8),IDNUM     Put IDNUM on line
+         LA    1,ACCBAL1+4        Set default place for $
+         CP    ACCBAL,=P'0'   Is bal >= 0?
          BC    B'1010',BALPOS     Skip to BALPOS
-         MVC   ACCBAL1(13),=X'404020202021204B202040C3D9'
+         MVC   ACCBAL1(12),=X'4020202021204B202040C3D9'
          B     ENDN               Merge back with pos
-BALPOS   MVC   ACCBAL1(13),=X'404020202021204B2020404040'
-ENDN     EDMK  ACCBAL1(13),ACCBAL Put ACCBAL on line
-         MVI   0(1),C'$'
-         XPRNT LINE,80
-         A     4,=F'4'            Increment table pointer
+BALPOS   MVC   ACCBAL1(12),=X'4020202021204B2020404040'
+ENDN     EDMK  ACCBAL1(12),ACCBAL Put ACCBAL on line
+         MVI   0(1),C'$'          Add $ to line
+         XPRNT LINE,79            Print the line
+         A     4,=F'32'           Increment table pointer
          A     9,=F'1'            Increment Loop counter
-         C     9,=F'7'            7 on the line?
-         B     PLOOP2             Again
+         C     9,=F'5'            5 not printed?
+         BNE   PLOOP2             Print another
+         B     PLOOP1             Reprint header.
 *
 ENDPLOOP L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
