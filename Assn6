@@ -212,5 +212,33 @@ PRINTSV  DS    18F                Create register save area
 * 13     Address of PRINTSV (save area)  
 * 14     Return Address
 ********************************************
+TRANS    CSECT 
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as Base Register
+         USING TRANS,12           Use 12 as Base Register 
+         LA    14,TRANSSV         Load TRANSSV into 14
+         ST    14,8(0,14)         Link backward pointer
+         ST    13,4(0,14)         Link forward pointer
+         LR    13,14              Load SEARCHSV
+         USING ENTRY,4
+         LM    4,7,0(1)           Unload parameters
+		 L     9,8(1)             Load address of buffer
+*
+TLOOP    XREAD 0(0,9),80          Read line into buffer
+         CLC   0(8,9),4           in the table? 
+		 BE    DECIPHER
+DECIPHER CLC    0(8,9),=C'W'      Is it a Withdrawal
+         BE     WDRW
+		 CLC    0(8,9),=C'B'      Is it a Balance Query 
+         BE     BAL
+		 CLC    0(8,9),=C'D'      Is it a Deposit 
+		 BE     DEP
+WDRW     
+BAL
+DEP		 
+*         
+ENDTLOOP L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN         
          END
 //FT05F001  DD  DSN=KC02314.SPRING17.CSCI360.HW6DATA,DISP=SHR
