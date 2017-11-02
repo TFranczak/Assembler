@@ -29,7 +29,6 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(BUILD)       Load virtual address of BUILD
          BALR  14,15              Do BUILD subroutine
-         XDUMP TABLE,1280
          SPACE
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(PRINT)       Load virtual address of PRINT
@@ -44,9 +43,9 @@ TABLE    DS    40CL32             Declare Entry Table
 EOT      DS    F                  Declare End of Table
 CAPTION  DC    C'1'               Caption for PRINT - 80
          DC    22C' '
-         DC    C'Odds and Ends Customer Data'
+         DC    CL27'Odds and Ends Customer Data'
          DC    22C' '
-         DC    C'Page    '
+         DC    CL8'Page    '
 PAGENUM  DC    PL2'1'             Declares pagenum
 BUFFER   DS    80C                Declare Buffer
          DC    C'*'               End for XDECI
@@ -139,7 +138,8 @@ PRINT    CSECT
          LR    13,14              Load SEARCHSV
          USING ENTRY,4
          LM    4,7,0(1)           Unload parameters
-PLOOP1   MVC   78(2,6),0(7)       Append proper page num
+PLOOP1   MVC   76(4,6),=XL4'40202120' Set pattern
+         ED    76(4,6),0(7)     Append proper page num
          XPRNT 0(7),80            Print CAPTION line
          XPRNT HEADER,76          Print HEADER line
          SR    9,9                Zero loop counter
@@ -164,6 +164,10 @@ ENDN     EDMK  ACCBAL1(12),ACCBAL Put ACCBAL on line
          A     9,=F'1'            Increment Loop counter
          C     9,=F'5'            5 not printed?
          BNE   PLOOP2             Print another
+         XPRNT EMPTYLN,1          Adds 3 blank lines
+         XPRNT EMPTYLN,1
+         XPRNT EMPTYLN,1
+         AP    0(1,7),=P'1'       Increment page counter
          B     PLOOP1             Reprint header.
 *
 ENDPLOOP L     13,4(0,13)         Load register list
@@ -186,6 +190,7 @@ LNAME1   DS    10C
 IDNUM1   DS    8C
          DC    15C' '
 ACCBAL1  DS    12C
+EMPTYLN  DC    C' '               Blank line for printing
 PRINTSV  DS    18F                Create register save area
          SPACE
          SPACE
@@ -207,20 +212,5 @@ PRINTSV  DS    18F                Create register save area
 * 13     Address of PRINTSV (save area)  
 * 14     Return Address
 ********************************************
-TRANS    CSECT 
-         STM   14,12,12(13)       Save registers
-         LR    12,15              Load 12 as Base Register
-         USING PRINT,12           Use 12 as Base Register 
-         LA    14,PRINTSV         Load PRINTSV into 14
-         ST    14,8(0,14)         Link backward pointer
-         ST    13,4(0,14)         Link forward pointer
-         LR    13,14              Load SEARCHSV
-         USING ENTRY,4
-         LM    4,7,0(1)           Unload parameters
-*
-ENDTLOOP L     13,4(0,13)         Load register list
-         LM    14,12,12(13)       Reload registers
-         BR    14                 Branch back to MAIN         
-         END
          END
 //FT05F001  DD  DSN=KC02314.SPRING17.CSCI360.HW6DATA,DISP=SHR
