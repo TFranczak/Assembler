@@ -207,7 +207,7 @@ PRINTSV  DS    18F                Create register save area
 *  6     Value in table
 *  7     Division
 *  8     Address of Outline variables
-*  9     Counter variable
+*  9     Address of buffer    
 * 12     Base register
 * 13     Address of PRINTSV (save area)  
 * 14     Return Address
@@ -222,7 +222,7 @@ TRANS    CSECT
          LR    13,14              Load SEARCHSV
          USING ENTRY,4
          LM    4,7,0(1)           Unload parameters
-		 L     9,8(1)             Load address of buffer
+         L     9,8(1)             Load address of buffer
 *
 TLOOP    XREAD 0(0,9),80          Read line into buffer
          CLC   0(8,9),4           in the table? 
