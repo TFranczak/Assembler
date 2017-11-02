@@ -207,5 +207,20 @@ PRINTSV  DS    18F                Create register save area
 * 13     Address of PRINTSV (save area)  
 * 14     Return Address
 ********************************************
+TRANS    CSECT 
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as Base Register
+         USING PRINT,12           Use 12 as Base Register 
+         LA    14,PRINTSV         Load PRINTSV into 14
+         ST    14,8(0,14)         Link backward pointer
+         ST    13,4(0,14)         Link forward pointer
+         LR    13,14              Load SEARCHSV
+         USING ENTRY,4
+         LM    4,7,0(1)           Unload parameters
+*
+ENDTLOOP L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN         
+         END
          END
 //FT05F001  DD  DSN=KC02314.SPRING17.CSCI360.HW6DATA,DISP=SHR
