@@ -4,7 +4,7 @@
 //SYSPRINT DD SYSOUT=*
 //SYSIN DD *
 ********************************************
-* Assignment 5 - Pair Programmed
+* Assignment 6 - Pair Programmed
 * Names: Tommy Franczak, Matt Rycraft
 *
 * Function: 
@@ -204,8 +204,11 @@ PRINTSV  DS    18F                Create register save area
 ********************************************
 * Trans Subroutine
 *
-* Function: 
-* 
+* Function: Check To see if client ID from
+* buffer is found in table. Then checks what
+* type of transaction was done and edits table
+* with new information after the transaction
+*
 * Register Usage
 *
 *  4     Table address
