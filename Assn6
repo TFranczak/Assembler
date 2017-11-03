@@ -251,8 +251,7 @@ INTABLE  MVI   FOUND+1,C' '       Clear FOUND line
          CLC   10(1,6),=C'B'      Balance?
          BE    BALANCE            Go to balance
          LA    1,FOUND+41         Set place for $
-         MVC   TEMPT(7),13(8)     Fill tempt
-         PACK  AMT(4),TEMPT       Pack amount
+         PACK  AMT(4),13(7,6)      Pack amount
          MVC   FOUND+36(11),=XL11'404020206B2021204B2020'
          EDMK  FOUND+36(11),AMT   Put amount on line
          MVI   0(1),C'$'          Insert $
@@ -307,7 +306,7 @@ FFIN     XPRNT FOUND,80           Print found line
 *
 *
 NINTABLE MVC   NFOUND+12(8),0(6)  Put Acc num on line
-         PACK  DATE(8),22(6)      Pack date
+         PACK  DATE(5),22(6)      Pack date
          MVC   NFOUND+68(11),=XL11'4021206120206120202020'
          ED    NFOUND+68(11),DATE Put date in
          CLC   10(1,6),=C'B'      Balance?
