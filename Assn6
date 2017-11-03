@@ -251,7 +251,8 @@ INTABLE  MVI   FOUND+1,C' '       Clear FOUND line
          CLC   10(1,6),=C'B'      Balance?
          BE    BALANCE            Go to balance
          LA    1,FOUND+41         Set place for $
-         PACK  AMT(4),13(7,8)     Pack amount
+         MVC   TEMPT(7),13(8)     Fill tempt
+         PACK  AMT(4),TEMPT       Pack amount
          MVC   FOUND+36(11),=XL11'404020206B2021204B2020'
          EDMK  FOUND+36(11),AMT   Put amount on line
          MVI   0(1),C'$'          Insert $
@@ -262,7 +263,7 @@ INTABLE  MVI   FOUND+1,C' '       Clear FOUND line
          BE    DEPOSIT            Go to deposit
 *
 WITHDRAW MVC   FOUND+18(8),=C'Withdrawal' Put type on line
-         AP    TAMT(4),AMT(4)     Add amount to table
+         AP    TAMT,AMT           Add amount to table
          LA    1,FOUND+73         Set inital place for $
          CP    28(4,8),=P'0'      Pos?
          BE    WPOS
@@ -342,6 +343,7 @@ DATE     DS    PL5                Variable to hold date
          DS    0F                 Put packed nums on fullword
 AMT      DS    PL4                Variable to hold amount
 TAMT     DS    PL4                Variable to hold amount in table
+TEMPT    DS    XL7
 FOUND    DC    CL1'0'             Found line - 80
          DC    CL4'    '
          DS    8C                 Acc Num 5
@@ -365,3 +367,5 @@ NFOUND   DC    C'0'               Not found line - 79
          SPACE
          SPACE
          SPACE
+         END
+//FT05F001  DD  DSN=KC02314.SPRING17.CSCI360.HW6DATA,DISP=SHR
