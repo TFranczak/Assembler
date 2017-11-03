@@ -34,7 +34,6 @@ MAIN     CSECT
          L     15,=V(PRINT)       Load virtual address of PRINT
          BALR  14,15              Do PRINT subroutine
          SPACE
-         XDUMP TABLE,1280
          LA    1,PLIST            Load PLIST into R1
          L     15,=V(TRANS)       Load virtual address of TRANS
          BALR  14,15              Do TRANS subroutine
@@ -50,7 +49,8 @@ CAPTION  DC    C'1'               Caption for PRINT - 80
          DC    22C' '
          DC    CL27'Odds and Ends Customer Data'
          DC    22C' '
-         DC    CL8'Page    '
+         DC    CL4'Page'
+         DC    4C' '              Space for num, 76
 PAGENUM  DC    PL2'1'             Declares pagenum
 BUFFER   DS    80C                Declare Buffer
          DC    C'*'               End for XDECI
@@ -128,7 +128,6 @@ BUILDSV  DS    18F                Subroutine save
 *  5     EOT Pointer
 *  6     Address of pagenum
 *  7     Address of CAPTION
-*  8     Address of Outline variables
 *  9     Counter variable
 * 12     Base register
 * 13     Address of PRINTSV (save area)  
@@ -145,8 +144,8 @@ PRINT    CSECT
          USING ENTRY,4            Load DSECT
          LM    4,7,0(1)           Unload parameters
          LA    6,16(1)            Unload pagenum
-*PLOOP1   MVC   77(3,7),=X'40202120' Set pattern
-*         ED    77(3,7),0(6)       Append proper page num
+*PLOOP1   MVC   76(4,7),=X'40202120' Set pattern
+*         ED    76(4,7),0(6)       Append proper page num
 PLOOP1   XPRNT 0(7),80            Print CAPTION line
          XPRNT HEADER,76          Print HEADER line
          SR    9,9                Zero loop counter
@@ -174,7 +173,7 @@ ENDN     EDMK  ACCBAL1(12),ACCBAL Put ACCBAL on line
          XPRNT EMPTYLN,1          Adds 3 blank lines
          XPRNT EMPTYLN,1
          XPRNT EMPTYLN,1
-*         AP    0(2,6),=P'1'       Increment page counter
+*        AP    0(2,6),=P'1'       Increment page counter
          B     PLOOP1             Reprint header.
 *
 ENDPLOOP L     13,4(0,13)         Load register list
@@ -244,10 +243,10 @@ TBLCHCK  CLC   0(8,6),20(8)        ID in table?
 *
 INTABLE  MVI   FOUND+1,C' '       Clear FOUND line
          MVC   FOUND+1(79),FOUND+1
-         MVC   FOUND+4(8),0(8)    Put Acc num on line
-         PACK  DATE(5),22(8,6)      Pack date
-         MVC   FOUND+51(11),=XL11'4021206120206120202020'
-         ED    FOUND+51(11),DATE  Put date on line
+         MVC   FOUND+4(8),20(8)   Put Acc num on line
+         PACK  DATE(5),22(8,6)    Pack date
+         MVC   FOUND+50(12),=XL12'402020206120206120202020'
+         ED    FOUND+50(12),DATE  Put date on line
          CLC   10(1,6),=C'B'      Balance?
          BE    BALANCE            Go to balance
          LA    1,FOUND+41         Set place for $
@@ -261,7 +260,7 @@ INTABLE  MVI   FOUND+1,C' '       Clear FOUND line
          CLC   10(1,6),=C'D'      Deposit?
          BE    DEPOSIT            Go to deposit
 *
-WITHDRAW MVC   FOUND+18(8),=C'Withdrawal' Put type on line
+WITHDRAW MVC   FOUND+18(13),=C'Withdrawal   ' Put type on line
          AP    TAMT,AMT           Add amount to table
          LA    1,FOUND+73         Set inital place for $
          CP    28(4,8),=P'0'      Pos?
@@ -271,12 +270,13 @@ WPOS     MVC   FOUND+67(13),=XL13'4020206B2021204B2020404040'
          B     WMEET
 WNEG     MVC   FOUND+67(13),=XL13'4020206B2021204B202040C3D9'
 WMEET    EDMK  FOUND+67(13),28(8) Put balance in line
+         BCTR  1,0                Decrement R1
          MVI   0(1),C'$'          Put $
          B     FFIN1
 *
-DEPOSIT  MVC   FOUND+18(7),=C'Deposit' Put type on line
+DEPOSIT  MVC   FOUND+18(13),=C'Deposit      ' Put type on line
          SP    28(4,8),AMT(4)
-         LA    1,FOUND+72         Set inital place for $
+         LA    1,FOUND+73         Set inital place for $
          CP    28(4,8),=P'0'      Pos balance?
          BE    DPOS
          B     DNEG
@@ -284,18 +284,21 @@ DPOS     MVC   FOUND+67(13),=XL13'4020206B2021204B2020404040'
          B     DMEET
 DNEG     MVC   FOUND+67(13),=XL13'4020206B2021204B202040C3D9'   
 DMEET    EDMK  FOUND+67(13),28(8) Put balance in line
+         BCTR  1,0                Decrement R1
          MVI   0(1),C'$'          Put $
          B     FFIN1
 *
 BALANCE  MVC   FOUND+18(13),=C'Balance Query'
          LA    1,FOUND+73         Set initial place for $
          CP    28(4,8),=P'0'      Pos balance?
+         MVC   FOUND+36(11),=11C' '
          BE    BPOS               Go to pos
          B     BNEG               Else: Go to neg
 BPOS     MVC   FOUND+67(13),=XL13'4020206B2021204B2020404040'
          B     BMEET
 BNEG     MVC   FOUND+67(13),=XL13'4020206B2021204B202040C3D9'
 BMEET    EDMK  FOUND+67(13),28(8) Put balance in line
+         BCTR  1,0                Decrement R1
          MVI   0(1),C'$'          Insert $
          B     FFIN
 *
@@ -306,15 +309,17 @@ FFIN     XPRNT FOUND,80           Print found line
 *
 *
 NINTABLE MVC   NFOUND+12(8),0(6)  Put Acc num on line
-         PACK  DATE(5),22(6)      Pack date
-         MVC   NFOUND+68(11),=XL11'4021206120206120202020'
-         ED    NFOUND+68(11),DATE Put date in
+         PACK  DATE(5),22(8,6)      Pack date
+         MVC   NFOUND+68(12),=XL12'402020206120206120202020'
+         ED    NFOUND+68(12),DATE Put date in
          CLC   10(1,6),=C'B'      Balance?
          BE    NFBALN             Go to NFBALN
-         LA    1,NFOUND+60        Default place for $
-         PACK  AMT,13(6)          Put Amount into AMT
+         LA    1,NFOUND+59        Default place for $
+         PACK  AMT(4),13(7,6)     Put Amount into AMT
          MVC   NFOUND+55(10),=XL10'4020206B2021204B2020'
          EDMK  NFOUND+55(10),AMT  Put amount in line
+         BCTR  1,0                Decrement R1
+         MVI   0(1),C'$'         Insert $
          CLC   10(1,6),=C'W'      Withdraw?
          BE    NFWITH             Go to NFWITH
          CLC   10(1,6),=C'D'      Deposit?
@@ -330,7 +335,7 @@ NFBALN   MVC   NFOUND+41(13),=CL13'Balance Query'
          MVC   NFOUND+55(10),=CL10'             '
          B     NIFIN
 *
-NIFIN    XPRNT NFOUND,79          Print not found line
+NIFIN    XPRNT NFOUND,80          Print not found line
          B     TLOOP              Do next line
 *
 ENDTLOOP L     13,4(0,13)         Load register list
@@ -339,22 +344,21 @@ ENDTLOOP L     13,4(0,13)         Load register list
          LTORG
 TRANSV   DS    18F
 DATE     DS    PL5                Variable to hold date
-         DS    0F                 Put packed nums on fullword
 AMT      DS    PL4                Variable to hold amount
 TAMT     DS    PL4                Variable to hold amount in table
 TEMPT    DS    XL7
 FOUND    DC    CL1'0'             Found line - 80
          DC    CL4'    '
-         DS    8C                 Acc Num 5
+         DC    CL8'        '      Acc Num 5
          DC    CL5'     '
          DS    13C                Trans type 18
          DC    CL5'     '
          DS    11C                Amount 36
-         DC    CL4'    '
-         DS    11C                Date 51
+         DC    CL3'   '
+         DS    12C                Date 51
          DC    CL5'     '
          DS    13C                New balance 67
-NFOUND   DC    C'0'               Not found line - 79
+NFOUND   DC    C'0'               Not found line - 80
          DC    CL11'Error!  ID '
          DS    8C                 Acc num 12
          DC    CL21' was not found for a '
@@ -362,7 +366,7 @@ NFOUND   DC    C'0'               Not found line - 79
          DC    C' '
          DS    10C                Amount 55         
          DC    CL3' on'
-         DS    11C                Date 68
+         DS    18C                Date 68
          SPACE
          SPACE
          SPACE
