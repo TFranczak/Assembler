@@ -83,12 +83,13 @@ BUILD    CSECT
          ST    14,8(0,14)         Load backward pointer
          ST    14,4(0,14)         Load forward pointer
          LR    13,14              Load BuildSv
+         L     8,=F'2'            Sets R8 to 2 
 *         
          USING ENTRY,4            
          LM    4,5,0(1)           Unload parameters 
          L     9,8,0(1)           Load address of buffer 
 *         
-BLOOP    XREAD 0(0,9),80          Read into buffer 
+BLOOP1   XREAD 0(0,9),80          Read into buffer 
          BE    ENDBLP             END Loop
 BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
          LR    6,1                Points R6 to first non-empty location
@@ -103,11 +104,29 @@ BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
          EX    7,TDATE            Put date into Table
          BCT   8,BLOOP2      
 *        
-ELENAME  MVC   NAME(13),=CL12' '  Initialize name
+ELENAME  MVC   NAME(13),=CL13' '  Initialize name
          EX    7,TNAME            Put name into table
+         L     8,=F'2'            Sets R8 to 2
+         LA    10,TNUM            load address of 1st EX statement
 *
+ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
+         EX    7,0(0,10)          Put symbol into the table
+         LA    10,6(0,10)         Increment EX counter
+         L     8,=F'2'            Sets R8 to 2
+*
+ELENUM   TRT   0(80,1),DIGITS     Find next digit
+         BC    B'1000',ENDNUM     if no digit is found end NUM loop
+         LR    6,1                Sets R6 to location of digit
+         TRT   0(80,1),SPACES     Find next empty space
+         LR    7,1                Sets R7 to location of empty space
+         SR    7,6                Sets R7 to length of number
+         BCTR  7,0                Decrement R7 to actual length
+         EX    7,0(0,10)          Put number into Table
+         LA    10,6(0,10)         Increment EX counter
+         B     BLOOP1             Return to BLOOP1
          LA    4,25(0,4)          Increment table pointer
- *        
+ENDBLP   ST    4,0(5)             Store EOT at last unused spot
+*        
          LTORG                                                          
 BUILDSV  DS    18F                Allocate 18F for save area         
 NOTSPACE DC    256X'FF'           Create search table to            
@@ -117,7 +136,11 @@ NOTSPACE DC    256X'FF'           Create search table to
 SPACES   DC    256X'00'           Create search table to            
          ORG   SPACES+C' '        search for first empty            
          DC    X'FF'              space                             
-         ORG                                                                                                                                                                      
+         ORG  
+DIGITS   DC    256X'00'
+         ORG   DIGITS+X'F0'
+         DC    10X'01'
+         ORG
 TDATE    MVC   DATE(0),0(6)       EX for Date                
 TNAME    MVC   NAME(0),0(6)       EX for Name                  
 TSYMBOL  MVC   SYMBOL(0),0(0,6)   EX for Symbol                 
