@@ -38,9 +38,9 @@ MAIN     CSECT
 *         
          LTORG                    Literal origin
          ORG MAIN+((*-MAIN+31)/32)*32
-TABLE    DC    120CL25            Declare entry table
+TABLE    DS    120CL25            Declare entry table
 EOT      DS    F                  Declare end of table 
-BUFFER   DC    80C                Declare buffer
+BUFFER   DS80C                Declare buffer
          DC    C'*'
 *         
 PAGENUM  DC    PL1'1'             ! packed number for page num
@@ -87,7 +87,7 @@ BUILD    CSECT
 *         
          USING ENTRY,4            
          LM    4,5,0(1)           Unload parameters 
-         L     9,8,0(1)           Load address of buffer 
+         L     9,8(1)             Load address of buffer 
 *         
 BLOOP1   XREAD 0(0,9),80          Read into buffer 
          BE    ENDBLP             END Loop
@@ -115,7 +115,7 @@ ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
          L     8,=F'2'            Sets R8 to 2
 *
 ELENUM   TRT   0(80,1),DIGITS     Find next digit
-         BC    B'1000',ENDNUM     if no digit is found end NUM loop
+         BC    B'1000',BLOOP1     if no digit is found end NUM loop
          LR    6,1                Sets R6 to location of digit
          TRT   0(80,1),SPACES     Find next empty space
          LR    7,1                Sets R7 to location of empty space
@@ -126,7 +126,11 @@ ELENUM   TRT   0(80,1),DIGITS     Find next digit
          B     BLOOP1             Return to BLOOP1
          LA    4,25(0,4)          Increment table pointer
 ENDBLP   ST    4,0(5)             Store EOT at last unused spot
-*        
+*
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+*         
          LTORG                                                          
 BUILDSV  DS    18F                Allocate 18F for save area         
 NOTSPACE DC    256X'FF'           Create search table to            
@@ -143,7 +147,8 @@ DIGITS   DC    256X'00'
          ORG
 TDATE    MVC   DATE(0),0(6)       EX for Date                
 TNAME    MVC   NAME(0),0(6)       EX for Name                  
-TSYMBOL  MVC   SYMBOL(0),0(0,6)   EX for Symbol                 
+TSYMBOL  MVC   SYMBOL(0),0(6)   EX for Symbol                 
 TNUM     PACK  NUMBER(2),0(0,6)   EX for Number                
- **************************************************************        
+************************************************************** 
+         END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
