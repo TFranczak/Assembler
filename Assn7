@@ -125,8 +125,8 @@ ELENUM   TRT   0(80,1),DIGITS     Find next digit
          LA    10,6(0,10)         Increment EX counter
          LA    4,25(0,4)          Increment table pointer
          B     BLOOP1             Return to BLOOP1
+*         
 ENDBLP   ST    4,0(5)             Store EOT at last unused spot
-*
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
