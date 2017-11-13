@@ -123,8 +123,8 @@ ELENUM   TRT   0(80,1),DIGITS     Find next digit
          BCTR  7,0                Decrement R7 to actual length
          EX    7,0(0,10)          Put number into Table
          LA    10,6(0,10)         Increment EX counter
-         B     BLOOP1             Return to BLOOP1
          LA    4,25(0,4)          Increment table pointer
+         B     BLOOP1             Return to BLOOP1
 ENDBLP   ST    4,0(5)             Store EOT at last unused spot
 *
          L     13,4(0,13)         Load register list
