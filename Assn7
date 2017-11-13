@@ -60,9 +60,9 @@ NUMBER   DS    PL2                Number = 2 packed num
 *
 * Function: Reads in numbers from an 
 * unknown file and builds a table of  
-* 40 fullwords. Firstname(10 characters),
-* Lastname(10 characters), ID Num (8 characters)
-* Account Balance (4 Characters)
+* 120 Full words, The element name, symbol
+* the date the element was found and 
+* the elements atomic weight 
 * 
 * Register Usage
 *
@@ -149,6 +149,65 @@ TDATE    MVC   DATE(0),0(6)       EX for Date
 TNAME    MVC   NAME(0),0(6)       EX for Name                  
 TSYMBOL  MVC   SYMBOL(0),0(6)   EX for Symbol                 
 TNUM     PACK  NUMBER(2),0(0,6)   EX for Number                
-************************************************************** 
+********************************************
+* Print Subroutine
+*
+* Function: Reads in numbers from an 
+* unknown file and builds a table of  
+* 120 Full words, The element name, symbol
+* the date the element was found and 
+* the elements atomic weight 
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     First nonspace of digit
+*  8     Address of Outline variables
+*  9     Address of buffer
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
+******************************************** 
+PRINT    CSECT
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as base register
+         USING BUILD,12           Use 12 as base register
+         LA    14,BUILDSV         Load buildsv into register 14
+         ST    14,8(0,14)         Load backward pointer
+         ST    14,4(0,14)         Load forward pointer
+         LR    13,14              Load BuildSv
+         L     8,=F'2'            Sets R8 to 2 
+*         
+         USING ENTRY,4            
+         LM    4,5,0(1)           Unload parameters 
+         L     9,8(1)             Load address of buffer 
+*        
+PLOOP1   XPRNT 0(7),80            Print CAPTION line
+         XPRNT HEADER,76          Print HEADER line
+         SR    9,9                Zero loop counter     
+*
+PLOOP2   MVI   LINE+1,C' '        Clear LINE
+         MVC   LINE+1(78),LINE+1  Clear LINE
+         C     4,0(0,5)           EOT = Table Ptr?
+         BE    ENDPLOOP           Go to ENDPLOOP
+         MVC   ELNAME(13),NAME    PUT NAME ON LINE
+         MVC   ELSYMBOL(3),SYMBOL Put Symbol on line
+         MVC   ATNUM(2),NUMBER    Put Number on line
+         MVC   ELDATE(7),DATE     Put Date on line
+         
+*         
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+HEADER   DC    C'-'               Format for header line - 76
+         DC    C'Name of Element'
+         DC    3C' '
+         DC    C'Chemical Symbol'
+         DC    3C' '
+         DC    C'Atomic Number'
+         DC    4C' '
+         DC    C'Date Discovered'
+LINE     DC    C'0'               Declare print line - 79         
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
