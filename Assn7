@@ -81,7 +81,7 @@ BUILD    CSECT
          USING BUILD,12           Use 12 as base register
          LA    14,BUILDSV         Load buildsv into register 14
          ST    14,8(0,14)         Load backward pointer
-         ST    14,4(0,14)         Load forward pointer
+         ST    13,4(0,14)         Load forward pointer
          LR    13,14              Load BuildSv
          L     8,=F'2'            Sets R8 to 2 
 *         
