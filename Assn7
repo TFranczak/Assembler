@@ -152,7 +152,8 @@ TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 ********************************************
 * Print Subroutine
 *
-* Function: 
+* Function: Prints the contents of the table
+* no more then 50 per page. 
 * 
 * Register Usage
 *
@@ -226,5 +227,23 @@ ELSYMBOL DS    3C
 ATNUM    DS    2C
          DC    4C' '
 ELDATE   DS    7C
+********************************************
+* Sort Subroutine
+*
+* Function: Sorts the table alphabetically
+* calls print to reprint the newly sorted 
+* table
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     First nonspace of digit
+*  8     Address of Outline variables
+*  9     Loop Counter
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
+******************************************** 
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
