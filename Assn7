@@ -152,11 +152,7 @@ TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 ********************************************
 * Print Subroutine
 *
-* Function: Reads in numbers from an 
-* unknown file and builds a table of  
-* 120 Full words, The element name, symbol
-* the date the element was found and 
-* the elements atomic weight 
+* Function: 
 * 
 * Register Usage
 *
@@ -164,7 +160,7 @@ TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 *  5     EOT Pointer
 *  6     First nonspace of digit
 *  8     Address of Outline variables
-*  9     Address of buffer
+*  9     Loop Counter
 * 12     Base register
 * 13     Address of BUILDSV (save area)
 * 14     Return Address
@@ -185,6 +181,7 @@ PRINT    CSECT
 *        
 PLOOP1   XPRNT 0(7),80            Print CAPTION line
          XPRNT HEADER,76          Print HEADER line
+         XPRNT EMPTYLN,1          Print empty line after header
          SR    9,9                Zero loop counter     
 *
 PLOOP2   MVI   LINE+1,C' '        Clear LINE
@@ -198,12 +195,19 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          MVC   ELDATE(7),DATE     Put Date on line
          XPRNT LINE,79            Print line 
          A     4,=F'25'           Increment table pointer
-         ***Do we need a counter?*****
+         A     9,=F'1'            Increment counter
+         C     9,=F'50'           Is counter at 50?
+         BNE    PLOOP2            Start loop over
+         XPRNT  EMPTYLN,1         Print empty line
+         XPRNT  EMPTYLN,1         Print empty line
+         B      PLOOP1            Start PLOOP1 again
          
 *         
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
+*
+         LTORG
 PSAVE    DS    18F                Print Save area
 HEADER   DC    C'-'               Format for header line - 76
          DC    C'Name of Element'
@@ -213,7 +217,8 @@ HEADER   DC    C'-'               Format for header line - 76
          DC    C'Atomic Number'
          DC    4C' '
          DC    C'Date Discovered'
-LINE     DC    C'0'               Declare print line - 79   
+LINE     DC    C'0'               Declare print line - 79 
+EMPTYLN  DC    C' '               Blank line for printing
 ELNAME   DS    13C
          DC    3C' '
 ELSYMBOL DS    3C
