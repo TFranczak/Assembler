@@ -192,7 +192,7 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          MVC   ELNAME(13),NAME    PUT NAME ON LINE
          MVC   ELSYMBOL(3),SYMBOL Put Symbol on line
          MVC   ATNUM(2),X'40202120'   
-         EDMK  ELDATE(7),NUMBER   Put Number on line
+         EDMK  ATNUM(2),NUMBER   Put Number on line
          MVC   ELDATE(7),DATE     Put Date on line
          XPRNT LINE,79            Print line 
          A     4,=F'25'           Increment table pointer
@@ -202,7 +202,8 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          XPRNT  EMPTYLN,1         Print empty line
          XPRNT  EMPTYLN,1         Print empty line
          B      PLOOP1            Start PLOOP1 again
-*         
+*        
+ENDPLOOP DS    0H                 ENDPLOOP lable
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
