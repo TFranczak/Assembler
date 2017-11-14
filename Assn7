@@ -169,8 +169,8 @@ TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 PRINT    CSECT
          STM   14,12,12(13)       Save registers
          LR    12,15              Load 12 as base register
-         USING BUILD,12           Use 12 as base register
-         LA    14,BUILDSV         Load buildsv into register 14
+         USING PRINT,12           Use 12 as base register
+         LA    14,PSAVE           Load buildsv into register 14
          ST    14,8(0,14)         Load backward pointer
          ST    13,4(0,14)         Load forward pointer
          LR    13,14              Load BuildSv
@@ -202,7 +202,6 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          XPRNT  EMPTYLN,1         Print empty line
          XPRNT  EMPTYLN,1         Print empty line
          B      PLOOP1            Start PLOOP1 again
-         
 *         
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
