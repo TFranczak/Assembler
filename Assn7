@@ -40,7 +40,7 @@ MAIN     CSECT
          ORG MAIN+((*-MAIN+31)/32)*32
 TABLE    DS    120CL25            Declare entry table
 EOT      DS    F                  Declare end of table 
-BUFFER   DS80C                Declare buffer
+BUFFER   DS    80C                Declare buffer
          DC    C'*'
 *         
 PAGENUM  DC    PL1'1'             ! packed number for page num
