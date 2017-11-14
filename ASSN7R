@@ -1,0 +1,155 @@
+//KC034KBA JOB ,'Matt Rycraft',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Assignment 7 - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* Function:
+*
+* MAIN
+* Register Usage
+*
+*  1     Parameter List
+* 12     Base register
+* 13     Main save
+* 14     Return Address
+********************************************
+MAIN     CSECT
+         STM   14,12,12(13)       Copy registers
+         LR    12,15              Load 12 as base register
+         USING MAIN,12            Use 12 as base register
+         LA    14,MAINSAVE        Load MAINSAVE into R14
+         ST    13,4(,14)          Link forward pointer
+         ST    14,8(,13)          Link backward pointer
+         LR    13,14              Load MAINSAVE
+         SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(BUILD)       Load virtual address of BUILD
+         BALR  14,15              Do BUILD subroutine
+         SPACE
+*
+         L     13,4(0,13)         Load backward pointer
+         LM    14,12,12(13)       Load registers back
+         BR    14
+*
+         LTORG                    Literal origin
+         ORG MAIN+((*-MAIN+31)/32)*32
+TABLE    DS    120CL25            Declare entry table
+EOT      DS    F                  Declare end of table
+BUFFER   DS    80C                Declare buffer
+         DC    C'*'
+*
+PAGENUM  DC    PL1'1'             ! packed number for page num
+PLIST    DC    A(TABLE)           Parameter list
+         DC    A(EOT)
+         DC    A(BUFFER)
+         DC    A(PAGENUM)
+*
+MAINSAVE DS    18F                Declare MainSave
+ENTRY    DSECT                    Dummy section for table
+DATE     DS    CL7                Date = 7 characters long
+NAME     DS    CL13               Name = 13 characters long
+SYMBOL   DS    CL3                Symbol = 3 characters long
+NUMBER   DS    PL2                Number = 2 packed num
+********************************************
+* Build Subroutine
+*
+* Function: Reads in numbers from an
+* unknown file and builds a table of
+* 40 fullwords. Firstname(10 characters),
+* Lastname(10 characters), ID Num (8 characters)
+* Account Balance (4 Characters)
+*
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     First nonspace of digit
+*  8     Address of Outline variables
+*  9     Address of buffer
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
+********************************************
+BUILD    CSECT
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as base register
+         USING BUILD,12           Use 12 as base register
+         LA    14,BUILDSV         Load buildsv into register 14
+         ST    14,8(0,14)         Load backward pointer
+         ST    14,4(0,14)         Load forward pointer
+         LR    13,14              Load BuildSv
+         L     8,=F'2'            Sets R8 to 2
+*
+         USING ENTRY,4
+         LM    4,5,0(1)           Unload parameters
+         L     9,8(1)           Load address of buffer
+*
+BLOOP1   XREAD 0(0,9),80          Read into buffer
+         BE    ENDBLP             END Loop
+BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
+         LR    6,1                Points R6 to first non-empty location
+         TRT   0(80,1),SPACES     finds first empty space
+         LR    7,1                Points R7 to first empty location
+         SR    7,6                Set R7 to length of data
+         BCTR  7,0                Decrement R7 to real length
+*
+         C     8,=F'2'            If not first data
+         BNE   ELENAME            Branch to Element Name
+         MVC   DATE,=CL7' '       Initialize date
+         EX    7,TDATE            Put date into Table
+         BCT   8,BLOOP2
+*
+ELENAME  MVC   NAME(13),=CL13' '  Initialize name
+         EX    7,TNAME            Put name into table
+         L     8,=F'2'            Sets R8 to 2
+         LA    10,TNUM            load address of 1st EX statement
+*
+ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
+         EX    7,0(0,10)          Put symbol into the table
+         LA    10,6(0,10)         Increment EX counter
+         L     8,=F'2'            Sets R8 to 2
+*
+ELENUM   TRT   0(80,1),DIGITS     Find next digit
+         BC    B'1000',BLOOP1     if no digit is found end NUM loop
+         LR    6,1                Sets R6 to location of digit
+         TRT   0(80,1),SPACES     Find next empty space
+         LR    7,1                Sets R7 to location of empty space
+         SR    7,6                Sets R7 to length of number
+         BCTR  7,0                Decrement R7 to actual length
+         EX    7,0(0,10)          Put number into Table
+         LA    10,6(0,10)         Increment EX counter
+         LA    4,25(0,4)          Increment table pointer
+         B     BLOOP1             Return to BLOOP1
+ENDBLP   ST    4,0(5)             Store EOT at last unused spot
+*
+         XDUMP
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 branch back to MAIN
+*
+         LTORG
+BUILDSV  DS    18F                Allocate 18F for save area
+NOTSPACE DC    256X'FF'           Create search table to
+         ORG   NOTSPACE+C' '      search for first non-empty
+         DC    X'00'              space
+         ORG
+SPACES   DC    256X'00'           Create search table to
+         ORG   SPACES+C' '        search for first empty
+         DC    X'FF'              space
+         ORG
+DIGITS   DC    256X'00'
+         ORG   DIGITS+X'F0'
+         DC    10X'01'
+         ORG
+TDATE    MVC   DATE(0),0(6)       EX for Date
+TNAME    MVC   NAME(0),0(6)       EX for Name
+TSYMBOL  MVC   SYMBOL(0),0(6)   EX for Symbol
+TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
+***************************************************************
+         END   MAIN
+//FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
