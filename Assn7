@@ -175,7 +175,7 @@ PRINT    CSECT
          USING BUILD,12           Use 12 as base register
          LA    14,BUILDSV         Load buildsv into register 14
          ST    14,8(0,14)         Load backward pointer
-         ST    14,4(0,14)         Load forward pointer
+         ST    13,4(0,14)         Load forward pointer
          LR    13,14              Load BuildSv
          L     8,=F'2'            Sets R8 to 2 
 *         
@@ -193,13 +193,18 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          BE    ENDPLOOP           Go to ENDPLOOP
          MVC   ELNAME(13),NAME    PUT NAME ON LINE
          MVC   ELSYMBOL(3),SYMBOL Put Symbol on line
-         MVC   ATNUM(2),NUMBER    Put Number on line
+         MVC   ATNUM(2),X'40202120'   
+         EDMK  ELDATE(7),NUMBER   Put Number on line
          MVC   ELDATE(7),DATE     Put Date on line
+         XPRNT LINE,79            Print line 
+         A     4,=F'25'           Increment table pointer
+         ***Do we need a counter?*****
          
 *         
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
+PSAVE    DS    18F                Print Save area
 HEADER   DC    C'-'               Format for header line - 76
          DC    C'Name of Element'
          DC    3C' '
@@ -208,6 +213,13 @@ HEADER   DC    C'-'               Format for header line - 76
          DC    C'Atomic Number'
          DC    4C' '
          DC    C'Date Discovered'
-LINE     DC    C'0'               Declare print line - 79         
+LINE     DC    C'0'               Declare print line - 79   
+ELNAME   DS    13C
+         DC    3C' '
+ELSYMBOL DS    3C
+         DC    3C' '
+ATNUM    DS    2C
+         DC    4C' '
+ELDATE   DS    7C
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
