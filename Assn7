@@ -1,4 +1,4 @@
-//KC034KBA JOB ,'Matt Rycraft',MSGCLASS=H
+//KC03I36A JOB ,'Matt Rycraft',MSGCLASS=H
 //STEP1 EXEC PGM=ASSIST
 //STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
 //SYSPRINT DD SYSOUT=*
@@ -30,8 +30,14 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(BUILD)       Load virtual address of BUILD
          BALR  14,15              Do BUILD subroutine
+         XDUMP TABLE,320
          SPACE
 *         
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(PRINT)       Load virtual address of BUILD
+         BALR  14,15              Do BUILD subroutine
+         SPACE
+*
          L     13,4(0,13)         Load backward pointer
          LM    14,12,12(13)       Load registers back
          BR    14
@@ -54,7 +60,7 @@ ENTRY    DSECT                    Dummy section for table
 DATE     DS    CL7                Date = 7 characters long 
 NAME     DS    CL13               Name = 13 characters long
 SYMBOL   DS    CL3                Symbol = 3 characters long
-NUMBER   DS    PL2                Number = 2 packed num 
+NUMBER   DS    PL2                Number = 2 packed num
 ********************************************
 * Build Subroutine
 *
@@ -91,7 +97,7 @@ BUILD    CSECT
 *         
 BLOOP1   XREAD 0(0,9),80          Read into buffer 
          BC    B'0100',ENDBLP     END Loop
-BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
+BLOOP2   TRT   0(80,9),NOTSPACE   find first non-empty
          LR    6,1                Points R6 to first non-empty location
          TRT   0(80,1),SPACES     finds first empty space
          LR    7,1                Points R7 to first empty location
@@ -107,11 +113,11 @@ BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
 ELENAME  MVC   NAME(13),=CL13' '  Initialize name
          EX    7,TNAME            Put name into table
          L     8,=F'2'            Sets R8 to 2
-*         LA    10,TNUM            load address of 1st EX statement
+         LA    10,TNUM            load address of 1st EX statement
 *
 ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
          EX    7,TSYMBOL          Put symbol into the table
-*         LA    10,6(0,10)         Increment EX counter
+         LA    10,6(0,10)         Increment EX counter
          L     8,=F'2'            Sets R8 to 2
 *
 ELENUM   TRT   0(80,1),DIGITS     Find next digit
