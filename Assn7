@@ -107,11 +107,11 @@ BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
 ELENAME  MVC   NAME(13),=CL13' '  Initialize name
          EX    7,TNAME            Put name into table
          L     8,=F'2'            Sets R8 to 2
-         LA    10,TNUM            load address of 1st EX statement
+*         LA    10,TNUM            load address of 1st EX statement
 *
 ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
-         EX    7,0(0,10)          Put symbol into the table
-         LA    10,6(0,10)         Increment EX counter
+         EX    7,TSYMBOL          Put symbol into the table
+*         LA    10,6(0,10)         Increment EX counter
          L     8,=F'2'            Sets R8 to 2
 *
 ELENUM   TRT   0(80,1),DIGITS     Find next digit
@@ -121,8 +121,8 @@ ELENUM   TRT   0(80,1),DIGITS     Find next digit
          LR    7,1                Sets R7 to location of empty space
          SR    7,6                Sets R7 to length of number
          BCTR  7,0                Decrement R7 to actual length
-         EX    7,0(0,10)          Put number into Table
-         LA    10,6(0,10)         Increment EX counter
+         EX    7,TNUM             Put number into Table
+*         LA    10,6(0,10)         Increment EX counter
          LA    4,25(0,4)          Increment table pointer
          B     BLOOP1             Return to BLOOP1
 *         
