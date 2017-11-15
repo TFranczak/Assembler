@@ -90,7 +90,7 @@ BUILD    CSECT
          L     9,8(1)             Load address of buffer 
 *         
 BLOOP1   XREAD 0(0,9),80          Read into buffer 
-         BE    ENDBLP             END Loop
+         BC    B'0100',ENDBLP     END Loop
 BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
          LR    6,1                Points R6 to first non-empty location
          TRT   0(80,1),SPACES     finds first empty space
