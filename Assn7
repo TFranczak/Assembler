@@ -266,7 +266,6 @@ SORT     CSECT
 *
          USING ENTRY,4            
          LM    4,5,0(1)           Unload parameters 
-         L     9,8(1)             Load address of buffer 
 *
          L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
