@@ -30,12 +30,21 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(BUILD)       Load virtual address of BUILD
          BALR  14,15              Do BUILD subroutine
-         XDUMP TABLE,320
          SPACE
 *         
          LA    1,PLIST            Load PLIST into 1
-         L     15,=V(PRINT)       Load virtual address of BUILD
-         BALR  14,15              Do BUILD subroutine
+         L     15,=V(PRINT)       Load virtual address of PRINT
+         BALR  14,15              Do PRINT subroutine
+         SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(SORT)        Load virtual address of SORT
+         BALR  14,15              Do SORT subroutine
+         SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(PRINT)       Load virtual address of PRINT
+         BALR  14,15              Do PRINT subroutine
          SPACE
 *
          L     13,4(0,13)         Load backward pointer
@@ -129,6 +138,8 @@ ELENAME  MVC   NAME(13),=CL13' '  Initialize name
 *
 ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
          EX    7,TSYMBOL          Put symbol into the table
+         TR    SYMBOL(1),TRTOUP     Capitalize first
+         TR    SYMBOL+1(12),TRTODOWN Lowercase rest of letters
          BCT   8,ELENUM
 *
 ELENUM   TRT   0(80,1),DIGITS     Find next digit
@@ -286,9 +297,10 @@ ELDATE   DS    7C
 *
 *  4     Table Pointer
 *  5     EOT Pointer
-*  6     First nonspace of digit
-*  8     Address of Outline variables
-*  9     Loop Counter
+*  6     Holds beginning of table
+*  7     Inner ptr
+*  8     Inner ptr-1
+*  9     Temp for ptr subtraction
 * 12     Base register
 * 13     Address of BUILDSV (save area)
 * 14     Return Address
@@ -304,32 +316,41 @@ SORT     CSECT
 *
          USING ENTRY,4            
          LM    4,5,0(1)             Unload parameters 
-*        
-SLOOP1   C     4,0(0,5)             At EOT?
-         BNL   ENDSLP1              Stop loop1 
-         LR    6,4                  R6 = I
-         LA    7,4(0,4)             R7 J = I + 1
-*         
-SLOOP2   C     7,0(0,5)             AT EOT?
-         BNL   ENDSLP2              Stop loop2
-         L     8,0(0,5)             R7 = table[j]
-         L     9,0(0,6)             R8 = table[small]
-         CLC   8(13),9(13)          compare j and small
-         BNL   SKIP                 
-         LR    7,6                  small = j
-*         
-SKIP     LA    7,4(0,5)             increment J
-         B     SLOOP2               repeat loop2
-*         
-ENDSLP2  L     10,0(0,4)            10 table[I]
-         ST    8,0(0,4)             Swap the
-         ST    9,0(0,6)             Two values
-         LA    4,0(0,4)             increment I
-         B     LOOP1                repeat loop1
-*         
-ENDSLP1  DS    0H                   
+*
+         LR    6,4                  6 holds begin table
+SORT1    A     4,=F'25'             Increment pointer
+         C     4,0(0,5)             At EOT?
+         BE    ENDSORT              If = end sort
+         LR    7,4                  7 holds temporary 4
+*
+SORT2    CR    4,6                  At begin table?
+         BE    END2
+         MVC   VALUE(13),NAME       Set value to current name              
+         S     4,=F'25'
+         MVC   VALUEL(13),NAME      Set valuel to previous name
+         CLC   VALUE(13),VALUEL     Is inner ptr < inner-1?
+         BC    B'0100',SWAP         Swap values if R4 is less
+         B     END2                Else, go to first loop
+*
+SWAP     MVC   NAME(13),VALUE       Swap later value with earlier
+         A     4,=F'25'
+         MVC   NAME(13),VALUEL      Swap earlier with later
+         S     4,=F'25'
+         B     SORT2     
+*
+END2     LR    4,7                  Restore 4
+         B     SORT1                Go back to outerloop
+*      
+ENDSORT  L     13,4(0,13)           Load register list
+         LM    14,12,12(13)         Reload registers
+         BR    14                   Branch back to MAIN
 *         
          LTORG
+VALUE    DS    13C                  Current table value
+VALUEL   DS    13C                  Previous table value
+TEMP     DS    13C                  Temp value for swap 
 SORTSV   DS    18F
+TNAME7   MVC   VALUE(0),0(7)        EX for Name
+TNAME8   MVC   VALUEL(0),0(8)
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
