@@ -317,6 +317,7 @@ SORT     CSECT
          USING ENTRY,4            
          LM    4,5,0(1)             Unload parameters 
 *
+         XPRNT SHEAD,80             Print Sort header
          LR    6,4                  6 holds begin table
 SORT1    A     4,=F'25'             Increment pointer
          C     4,0(0,5)             At EOT?
@@ -325,16 +326,16 @@ SORT1    A     4,=F'25'             Increment pointer
 *
 SORT2    CR    4,6                  At begin table?
          BE    END2
-         MVC   VALUE(13),NAME       Set value to current name              
+         MVC   VALUE(25),DATE       Set value to current name              
          S     4,=F'25'
-         MVC   VALUEL(13),NAME      Set valuel to previous name
-         CLC   VALUE(13),VALUEL     Is inner ptr < inner-1?
+         MVC   VALUEL(25),DATE      Set valuel to previous name
+         CLC   VALUE+7(13),VALUEL+7 Is inner ptr < inner-1?
          BC    B'0100',SWAP         Swap values if R4 is less
          B     END2                Else, go to first loop
 *
-SWAP     MVC   NAME(13),VALUE       Swap later value with earlier
+SWAP     MVC   DATE(25),VALUE       Swap later value with earlier
          A     4,=F'25'
-         MVC   NAME(13),VALUEL      Swap earlier with later
+         MVC   DATE(25),VALUEL      Swap earlier with later
          S     4,=F'25'
          B     SORT2     
 *
@@ -346,8 +347,11 @@ ENDSORT  L     13,4(0,13)           Load register list
          BR    14                   Branch back to MAIN
 *         
          LTORG
-VALUE    DS    13C                  Current table value
-VALUEL   DS    13C                  Previous table value
+SHEAD    DC    C'1'
+         DC    19C' '
+         DC    C'Chronological List of Elements'
+VALUE    DS    25C                  Current table value
+VALUEL   DS    25C                  Previous table value
 TEMP     DS    13C                  Temp value for swap 
 SORTSV   DS    18F
 TNAME7   MVC   VALUE(0),0(7)        EX for Name
