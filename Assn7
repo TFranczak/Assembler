@@ -35,6 +35,7 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(PRINT)       Load virtual address of PRINT
          BALR  14,15              Do PRINT subroutine
+         AP    PRINTNUM,=P'1'
          SPACE
 *
          LA    1,PLIST            Load PLIST into 1
@@ -45,6 +46,7 @@ MAIN     CSECT
          LA    1,PLIST            Load PLIST into 1
          L     15,=V(PRINT)       Load virtual address of PRINT
          BALR  14,15              Do PRINT subroutine
+         AP    PRINTNUM,=P'1'
          SPACE
 *
          L     13,4(0,13)         Load backward pointer
@@ -58,11 +60,13 @@ EOT      DS    F                  Declare end of table
 BUFFER   DS    80C                Declare buffer
          DC    C'*'
 *         
-PAGENUM  DC    PL1'1'             ! packed number for page num
+PAGENUM  DC    PL1'1'             packed number for page num
+PRINTNUM DC    PL1'1'             Packed for print
 PLIST    DC    A(TABLE)           Parameter list
          DC    A(EOT)
          DC    A(BUFFER)
          DC    A(PAGENUM)
+         DC    A(PRINTNUM)
 *         
 MAINSAVE DS    18F                Declare MainSave
 ENTRY    DSECT                    Dummy section for table
@@ -222,6 +226,8 @@ TRTODOWN DC    X'000102030405060708090A0B0C0D0E0F' To lowercase
 *  6     First nonspace of digit
 *  8     Address of Outline variables
 *  9     Loop Counter
+* 10     Address of pagenum
+* 11     Address of printnum
 * 12     Base register
 * 13     Address of BUILDSV (save area)
 * 14     Return Address
@@ -239,8 +245,12 @@ PRINT    CSECT
          LM    4,5,0(1)           Unload parameters 
          L     9,8(1)             Load address of buffer
          L     10,12(1)           Load address of pagenum 
+         L     11,16(1)           Load address of printnum
 *        
-PLOOP1   MVC   HEADER+78(2),=X'4020'
+PLOOP1   CP    0(1,11),=P'1'
+         BE    PRNTC
+         XPRNT SHEAD,80
+HEADPRNT MVC   HEADER+78(2),=X'4020'
          ED    HEADER+78(2),0(10)
          AP    0(1,10),=P'1'
          XPRNT HEADER,80          Print HEADER line
@@ -264,6 +274,9 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          XPRNT EMPTYLN,1          Print empty line
          XPRNT EMPTYLN,1          Print empty line
          B     PLOOP1             Start PLOOP1 again
+*
+PRNTC    XPRNT CHEAD,80           Print Chronological head
+         B     HEADPRNT           Go back up
 *        
 ENDPLOOP DS    0H                 ENDPLOOP lable
          L     13,4(0,13)         Load register list
@@ -283,6 +296,14 @@ HEADER   DC    C'-'               Format for header line - 77
          DC    3C' '              72
          DC    C'Page'            76
          DC    C'    '            80
+SHEAD    DC    C'1'                 SORT header
+         DC    19C' '
+         DC    C'Elements sorted by name'
+         DC    37C' '
+CHEAD    DC    C'1'
+         DC    19C' '
+         DC    C'Chronological List of Elements'
+         DC    30C' '
 LINE     DC    C'0'               Declare print line - 37 
 EMPTYLN  DC    C' '               Blank line for printing
 ELNAME   DS    13C
@@ -321,7 +342,6 @@ SORT     CSECT
          USING ENTRY,4            
          LM    4,5,0(1)             Unload parameters 
 *
-         XPRNT SHEAD,80             Print Sort header
          LR    6,4                  6 holds begin table
 SORT1    A     4,=F'25'             Increment pointer
          C     4,0(0,5)             At EOT?
@@ -351,10 +371,6 @@ ENDSORT  L     13,4(0,13)           Load register list
          BR    14                   Branch back to MAIN
 *         
          LTORG
-SHEAD    DC    C'1'                 SORT header
-         DC    19C' '
-         DC    C'Elements sorted by name'
-         DC    37C' '
 VALUE    DS    25C                  Current table value
 VALUEL   DS    25C                  Previous table value
 TEMP     DS    13C                  Temp value for swap 
