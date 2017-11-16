@@ -305,20 +305,29 @@ SORT     CSECT
          USING ENTRY,4            
          LM    4,5,0(1)             Unload parameters 
 *        
-SORT     C     4,0(0,5)             At EOT?
-         BE    ENDSORT              If = end sort 
-         ST    TEMP,4               Store value at R4 in TEMP
-         A     4,=F'25'             Increment Table pointer
-         CLC   TEMP(13),0(4)        compare R4 to TEMP
-         BC    B'0100',SWAP         Swap values if R4 is less
+SLOOP1   C     4,0(0,5)             At EOT?
+         BNL   ENDSLP1              Stop loop1 
+         LR    6,4                  R6 = I
+         LA    7,4(0,4)             R7 J = I + 1
 *         
-SWAP     ST    STEMP,TEMP           Store temp into stemp
-         ST    TEMP,4               Store value at R4 into temp
-
-
-         L     13,4(0,13)           Load register list
-         LM    14,12,12(13)         Reload registers
-         BR    14                   Branch back to MAIN
+SLOOP2   C     7,0(0,5)             AT EOT?
+         BNL   ENDSLP2              Stop loop2
+         L     8,0(0,5)             R7 = table[j]
+         L     9,0(0,6)             R8 = table[small]
+         CLC   8(13),9(13)          compare j and small
+         BNL   SKIP                 
+         LR    7,6                  small = j
+*         
+SKIP     LA    7,4(0,5)             increment J
+         B     SLOOP2               repeat loop2
+*         
+ENDPL2   L     10,0(0,4)            10 table[I]
+         ST    8,0(0,4)             Swap the
+         ST    9,0(0,6)             Two values
+         LA    4,0(0,4)             increment I
+         B     LOOP1                repeat loop1
+*         
+ENDPL1   DS    0H                   
 *         
          LTORG
 SORTSV   DS    18F
