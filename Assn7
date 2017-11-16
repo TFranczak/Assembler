@@ -239,13 +239,12 @@ PRINT    CSECT
          LM    4,5,0(1)           Unload parameters 
          L     9,8(1)             Load address of buffer 
 *        
-*PLOOP1   XPRNT 0(7),80            Print CAPTION line
-PLOOP1   XPRNT HEADER,69          Print HEADER line
+PLOOP1   XPRNT HEADER,80          Print HEADER line
          XPRNT EMPTYLN,1          Print empty line after header
          SR    9,9                Zero loop counter     
 *
 PLOOP2   MVI   LINE+1,C' '        Clear LINE
-         MVC   LINE+1(78),LINE+1  Clear LINE
+         MVC   LINE+1(37),LINE+1  Clear LINE
          C     4,0(0,5)           EOT = Table Ptr?
          BE    ENDPLOOP           Go to ENDPLOOP
          MVC   ELNAME(13),NAME    PUT NAME ON LINE
@@ -269,14 +268,17 @@ ENDPLOOP DS    0H                 ENDPLOOP lable
 *
          LTORG
 PSAVE    DS    18F                Print Save area
-HEADER   DC    C'-'               Format for header line - 69
+HEADER   DC    C'-'               Format for header line - 77
          DC    C'Name of Element'
          DC    3C' '
          DC    C'Chemical Symbol'
          DC    3C' '
          DC    C'Atomic Number'
-         DC    4C' '
-         DC    C'Date Discovered'
+         DC    4C' '              50
+         DC    C'Date Discovered' 69
+         DC    3C' '              72
+         DC    C'Page'            76
+         DC    C'    '            80
 LINE     DC    C'0'               Declare print line - 37 
 EMPTYLN  DC    C' '               Blank line for printing
 ELNAME   DS    13C
@@ -298,9 +300,7 @@ ELDATE   DS    7C
 *  4     Table Pointer
 *  5     EOT Pointer
 *  6     Holds beginning of table
-*  7     Inner ptr
-*  8     Inner ptr-1
-*  9     Temp for ptr subtraction
+*  7     Temp holder for 4
 * 12     Base register
 * 13     Address of BUILDSV (save area)
 * 14     Return Address
@@ -347,9 +347,10 @@ ENDSORT  L     13,4(0,13)           Load register list
          BR    14                   Branch back to MAIN
 *         
          LTORG
-SHEAD    DC    C'1'
+SHEAD    DC    C'1'                 SORT header
          DC    19C' '
-         DC    C'Chronological List of Elements'
+         DC    C'Elements sorted by name'
+         DC    37C' '
 VALUE    DS    25C                  Current table value
 VALUEL   DS    25C                  Previous table value
 TEMP     DS    13C                  Temp value for swap 
