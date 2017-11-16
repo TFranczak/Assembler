@@ -331,13 +331,13 @@ SORT2    CR    4,6                  At begin table?
          MVC   VALUEL(25),DATE      Set valuel to previous name
          CLC   VALUE+7(13),VALUEL+7 Is inner ptr < inner-1?
          BC    B'0100',SWAP         Swap values if R4 is less
-         B     END2                Else, go to first loop
+         B     END2                 Else, go to first loop
 *
 SWAP     MVC   DATE(25),VALUE       Swap later value with earlier
-         A     4,=F'25'
+         A     4,=F'25'             Increment table pointer
          MVC   DATE(25),VALUEL      Swap earlier with later
-         S     4,=F'25'
-         B     SORT2     
+         S     4,=F'25'             Decrement table pointer
+         B     SORT2                Repeat SORT2
 *
 END2     LR    4,7                  Restore 4
          B     SORT1                Go back to outerloop
