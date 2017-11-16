@@ -321,13 +321,13 @@ SLOOP2   C     7,0(0,5)             AT EOT?
 SKIP     LA    7,4(0,5)             increment J
          B     SLOOP2               repeat loop2
 *         
-ENDPL2   L     10,0(0,4)            10 table[I]
+ENDSLP2  L     10,0(0,4)            10 table[I]
          ST    8,0(0,4)             Swap the
          ST    9,0(0,6)             Two values
          LA    4,0(0,4)             increment I
          B     LOOP1                repeat loop1
 *         
-ENDPL1   DS    0H                   
+ENDSLP1  DS    0H                   
 *         
          LTORG
 SORTSV   DS    18F
