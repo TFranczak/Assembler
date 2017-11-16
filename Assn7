@@ -247,9 +247,9 @@ PRINT    CSECT
          L     10,12(1)           Load address of pagenum 
          L     11,16(1)           Load address of printnum
 *        
-PLOOP1   CP    0(1,11),=P'1'
-         BE    PRNTC
-         XPRNT SHEAD,80
+PLOOP1   CP    0(1,11),=P'1'      Printing first?
+         BE    PRNTC              Go to prntc
+         XPRNT SHEAD,80           Else print shead
 HEADPRNT MVC   HEADER+78(2),=X'4020'
          ED    HEADER+78(2),0(10)
          AP    0(1,10),=P'1'
@@ -296,11 +296,11 @@ HEADER   DC    C'-'               Format for header line - 77
          DC    3C' '              72
          DC    C'Page'            76
          DC    C'    '            80
-SHEAD    DC    C'1'                 SORT header
+SHEAD    DC    C'1'               SORT header
          DC    19C' '
          DC    C'Elements sorted by name'
          DC    37C' '
-CHEAD    DC    C'1'
+CHEAD    DC    C'1'               Chronological head
          DC    19C' '
          DC    C'Chronological List of Elements'
          DC    30C' '
