@@ -58,7 +58,7 @@ EOT      DS    F                  Declare end of table
 BUFFER   DS    80C                Declare buffer
          DC    C'*'
 *         
-PAGENUM  DC    PL1'1'             1 packed number for page num
+PAGENUM  DC    PL1'1'             ! packed number for page num
 PLIST    DC    A(TABLE)           Parameter list
          DC    A(EOT)
          DC    A(BUFFER)
@@ -173,7 +173,7 @@ DIGITS   DC    256X'00'
          ORG
 TDATE    MVC   DATE(0),0(6)       EX for Date                
 TNAME    MVC   NAME(0),0(6)       EX for Name                  
-TSYMBOL  MVC   SYMBOL(0),0(6)     EX for Symbol                 
+TSYMBOL  MVC   SYMBOL(0),0(6)   EX for Symbol                 
 TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 *
 TRTOUP   DC    X'000102030405060708090A0B0C0D0E0F' To uppercase
@@ -237,9 +237,13 @@ PRINT    CSECT
 *         
          USING ENTRY,4            
          LM    4,5,0(1)           Unload parameters 
-         L     9,8(1)             Load address of buffer 
+         L     9,8(1)             Load address of buffer
+         L     10,12(1)           Load address of pagenum 
 *        
-PLOOP1   XPRNT HEADER,80          Print HEADER line
+PLOOP1   MVC   HEADER+78(2),=X'4020'
+         ED    HEADER+78(2),0(10)
+         AP    0(1,10),=P'1'
+         XPRNT HEADER,80          Print HEADER line
          XPRNT EMPTYLN,1          Print empty line after header
          SR    9,9                Zero loop counter     
 *
@@ -331,13 +335,13 @@ SORT2    CR    4,6                  At begin table?
          MVC   VALUEL(25),DATE      Set valuel to previous name
          CLC   VALUE+7(13),VALUEL+7 Is inner ptr < inner-1?
          BC    B'0100',SWAP         Swap values if R4 is less
-         B     END2                 Else, go to first loop
+         B     END2                Else, go to first loop
 *
 SWAP     MVC   DATE(25),VALUE       Swap later value with earlier
-         A     4,=F'25'             Increment table pointer
+         A     4,=F'25'
          MVC   DATE(25),VALUEL      Swap earlier with later
-         S     4,=F'25'             Decrement table pointer
-         B     SORT2                Repeat SORT2
+         S     4,=F'25'
+         B     SORT2     
 *
 END2     LR    4,7                  Restore 4
          B     SORT1                Go back to outerloop
