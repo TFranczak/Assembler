@@ -134,7 +134,6 @@ ELENUM   TRT   0(80,1),DIGITS     Find next digit
          SR    7,6                Sets R7 to length of number
          BCTR  7,0                Decrement R7 to actual length
          EX    7,TNUM             Put number into Table
-*         LA    10,6(0,10)         Increment EX counter
          LA    4,25(0,4)          Increment table pointer
          B     BLOOP1             Return to BLOOP1
 *         
@@ -186,7 +185,6 @@ PRINT    CSECT
          ST    14,8(0,14)         Load backward pointer
          ST    13,4(0,14)         Load forward pointer
          LR    13,14              Load BuildSv
-         L     8,=F'2'            Sets R8 to 2 
 *         
          USING ENTRY,4            
          LM    4,5,0(1)           Unload parameters 
@@ -204,16 +202,16 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          MVC   ELNAME(13),NAME    PUT NAME ON LINE
          MVC   ELSYMBOL(3),SYMBOL Put Symbol on line
          MVC   ATNUM(2),=X'40202120'   
-         EDMK  ATNUM(2),NUMBER   Put Number on line
+         ED    ATNUM(2),NUMBER    Put Number on line
          MVC   ELDATE(7),DATE     Put Date on line
-         XPRNT LINE,79            Print line 
+         XPRNT LINE,37            Print line 
          A     4,=F'25'           Increment table pointer
          A     9,=F'1'            Increment counter
          C     9,=F'50'           Is counter at 50?
-         BNE    PLOOP2            Start loop over
-         XPRNT  EMPTYLN,1         Print empty line
-         XPRNT  EMPTYLN,1         Print empty line
-         B      PLOOP1            Start PLOOP1 again
+         BNE   PLOOP2             Start loop over
+         XPRNT EMPTYLN,1          Print empty line
+         XPRNT EMPTYLN,1          Print empty line
+         B     PLOOP1             Start PLOOP1 again
 *        
 ENDPLOOP DS    0H                 ENDPLOOP lable
          L     13,4(0,13)         Load register list
@@ -230,7 +228,7 @@ HEADER   DC    C'-'               Format for header line - 69
          DC    C'Atomic Number'
          DC    4C' '
          DC    C'Date Discovered'
-LINE     DC    C'0'               Declare print line - 79 
+LINE     DC    C'0'               Declare print line - 37 
 EMPTYLN  DC    C' '               Blank line for printing
 ELNAME   DS    13C
          DC    3C' '
