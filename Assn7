@@ -89,7 +89,6 @@ BUILD    CSECT
          ST    14,8(0,14)         Load backward pointer
          ST    13,4(0,14)         Load forward pointer
          LR    13,14              Load BuildSv
-         L     8,=F'2'            Sets R8 to 2 
 *         
          USING ENTRY,4            
          LM    4,5,0(1)           Unload parameters 
@@ -97,31 +96,38 @@ BUILD    CSECT
 *         
 BLOOP1   XREAD 0(0,9),80          Read into buffer 
          BC    B'0100',ENDBLP     END Loop
-BLOOP2   TRT   0(80,9),NOTSPACE   find first non-empty
+         L     8,=F'4'            Amount of args
+         LR    1,9
+BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
          LR    6,1                Points R6 to first non-empty location
          TRT   0(80,1),SPACES     finds first empty space
          LR    7,1                Points R7 to first empty location
          SR    7,6                Set R7 to length of data
          BCTR  7,0                Decrement R7 to real length
 *
-         C     8,=F'2'            If not first data
-         BNE   ELENAME            Branch to Element Name
-         MVC   DATE,=CL7' '       Initialize date 
+         C     8,=F'4'            First col?
+         BE    ELEDATE            
+         C     8,=F'3'            Second col?
+         BE    ELENAME
+         C     8,=F'2'            Third col?
+         BE    ELESYM
+         C     8,=F'1'            Fourth col?
+         BE    ELENUM
+*
+ELEDATE  MVC   DATE,=CL7' '       Initialize date 
          EX    7,TDATE            Put date into Table
          BCT   8,BLOOP2      
 *        
 ELENAME  MVC   NAME(13),=CL13' '  Initialize name
          EX    7,TNAME            Put name into table
-         L     8,=F'2'            Sets R8 to 2
          LA    10,TNUM            load address of 1st EX statement
+         BCT   8,BLOOP2
 *
 ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
          EX    7,TSYMBOL          Put symbol into the table
-         LA    10,6(0,10)         Increment EX counter
-         L     8,=F'2'            Sets R8 to 2
+         BCT   8,BLOOP2
 *
 ELENUM   TRT   0(80,1),DIGITS     Find next digit
-         BC    B'1000',BLOOP1     if no digit is found end NUM loop
          LR    6,1                Sets R6 to location of digit
          TRT   0(80,1),SPACES     Find next empty space
          LR    7,1                Sets R7 to location of empty space
@@ -186,8 +192,8 @@ PRINT    CSECT
          LM    4,5,0(1)           Unload parameters 
          L     9,8(1)             Load address of buffer 
 *        
-PLOOP1   XPRNT 0(7),80            Print CAPTION line
-         XPRNT HEADER,76          Print HEADER line
+*PLOOP1   XPRNT 0(7),80            Print CAPTION line
+PLOOP1   XPRNT HEADER,69          Print HEADER line
          XPRNT EMPTYLN,1          Print empty line after header
          SR    9,9                Zero loop counter     
 *
@@ -216,7 +222,7 @@ ENDPLOOP DS    0H                 ENDPLOOP lable
 *
          LTORG
 PSAVE    DS    18F                Print Save area
-HEADER   DC    C'-'               Format for header line - 76
+HEADER   DC    C'-'               Format for header line - 69
          DC    C'Name of Element'
          DC    3C' '
          DC    C'Chemical Symbol'
