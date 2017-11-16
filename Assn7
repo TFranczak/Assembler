@@ -116,10 +116,14 @@ BLOOP2   TRT   0(80,1),NOTSPACE   find first non-empty
 *
 ELEDATE  MVC   DATE,=CL7' '       Initialize date 
          EX    7,TDATE            Put date into Table
+         TR    DATE(1),TRTOUP     Capitalize first
+         TR    DATE+1(6),TRTODOWN Lowercase rest of letters
          BCT   8,BLOOP2      
 *        
 ELENAME  MVC   NAME(13),=CL13' '  Initialize name
          EX    7,TNAME            Put name into table
+         TR    NAME(1),TRTOUP     Capitalize first
+         TR    NAME+1(12),TRTODOWN Lowercase rest of letters
          LA    10,TNUM            load address of 1st EX statement
          BCT   8,BLOOP2
 *
@@ -159,7 +163,41 @@ DIGITS   DC    256X'00'
 TDATE    MVC   DATE(0),0(6)       EX for Date                
 TNAME    MVC   NAME(0),0(6)       EX for Name                  
 TSYMBOL  MVC   SYMBOL(0),0(6)   EX for Symbol                 
-TNUM     PACK  NUMBER(2),0(0,6)   EX for Number                
+TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
+*
+TRTOUP   DC    X'000102030405060708090A0B0C0D0E0F' To uppercase
+         DC    X'101112131415161718191A1B1C1D1E1F'
+         DC    X'202122232425262728292A2B2C2D2E2F'          
+         DC    X'303132333435363738393A3B3C3D3E3F'
+         DC    X'404142434445464748494A4B4C4D4E4F'
+         DC    X'505152535455565758595A5B5C5D5E5F'
+         DC    X'606162636465666768696A6B6C6D6E6F'
+         DC    X'707172737475767778797A7B7C7D7E7F'
+         DC    X'80C1C2C3C4C5C6C7C8C98A8B8C8D8E8F'
+         DC    X'90D1D2D3D4D5D6D7D8D99A9B9C9D9E9F'
+         DC    X'A0A1E2E3E4E5E6E7E8E9AAABACADAEAF'
+         DC    X'B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF'
+         DC    X'C0C1C2C3C4C5C6C7C8C9CACBCCCDCECF'
+         DC    X'D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF'
+         DC    X'E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEF'
+         DC    X'F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF'
+*
+TRTODOWN DC    X'000102030405060708090A0B0C0D0E0F' To lowercase
+         DC    X'101112131415161718191A1B1C1D1E1F'
+         DC    X'202122232425262728292A2B2C2D2E2F'          
+         DC    X'303132333435363738393A3B3C3D3E3F'
+         DC    X'404142434445464748494A4B4C4D4E4F'
+         DC    X'505152535455565758595A5B5C5D5E5F'
+         DC    X'606162636465666768696A6B6C6D6E6F'
+         DC    X'707172737475767778797A7B7C7D7E7F'
+         DC    X'808182838485868788898A8B8C8D8E8F'
+         DC    X'909192939495969798999A9B9C9D9E9F'
+         DC    X'A0A1A2A3A4A5A6A7A8A9AAABACADAEAF'
+         DC    X'B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF'
+         DC    X'C0818283848586878889CACBCCCDCECF'
+         DC    X'D0919293949596979899DADBDCDDDEDF'
+         DC    X'E0E1A2A3A4A5A6A7A8A9EAEBECEDEEEF'
+         DC    X'F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF'
 ********************************************
 * Print Subroutine
 *
@@ -174,7 +212,7 @@ TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 *  8     Address of Outline variables
 *  9     Loop Counter
 * 12     Base register
-* 13     Address of PSAVE (save area)
+* 13     Address of BUILDSV (save area)
 * 14     Return Address
 ******************************************** 
 PRINT    CSECT
@@ -204,7 +242,7 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          MVC   ATNUM(4),=X'40202120'   
          ED    ATNUM(4),NUMBER    Put Number on line
          MVC   ELDATE(7),DATE     Put Date on line
-         XPRNT LINE,37            Print line 
+         XPRNT LINE,62            Print line 
          A     4,=F'25'           Increment table pointer
          A     9,=F'1'            Increment counter
          C     9,=F'50'           Is counter at 50?
@@ -231,11 +269,11 @@ HEADER   DC    C'-'               Format for header line - 69
 LINE     DC    C'0'               Declare print line - 37 
 EMPTYLN  DC    C' '               Blank line for printing
 ELNAME   DS    13C
-         DC    3C' '
-ELSYMBOL DS    3C
-         DC    3C' '
-ATNUM    DS    2C
          DC    4C' '
+ELSYMBOL DS    3C
+         DC    14C' '
+ATNUM    DS    2C
+         DC    17C' '
 ELDATE   DS    7C
 ********************************************
 * Sort Subroutine
@@ -252,26 +290,8 @@ ELDATE   DS    7C
 *  8     Address of Outline variables
 *  9     Loop Counter
 * 12     Base register
-* 13     Address of SORTSV (save area)
+* 13     Address of BUILDSV (save area)
 * 14     Return Address
 ******************************************** 
-SORT     CSECT
-         STM   14,12,12(13)         Save Registers 
-         LR    12,15                Load Registers
-         USING SORT,12              Use 12 as base register
-         LA    14,SORTSV            Load SORTSV into R14
-         ST    14,4(14)             Load backwards pointer
-         ST    13,4(14)             Load forwards pointer
-         LR    13,14                Load SORTSV
-*
-         USING ENTRY,4            
-         LM    4,5,0(1)           Unload parameters 
-*
-         L     13,4(0,13)         Load register list
-         LM    14,12,12(13)       Reload registers
-         BR    14                 Branch back to MAIN
-*         
-         LTORG
-SORTSV   DS    18F 
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
