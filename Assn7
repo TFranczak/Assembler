@@ -125,7 +125,7 @@ ELENAME  MVC   NAME(13),=CL13' '  Initialize name
 *
 ELESYM   MVC   SYMBOL(3),=CL2' '  Initialize symbol
          EX    7,TSYMBOL          Put symbol into the table
-         BCT   8,BLOOP2
+         BCT   8,ELENUM
 *
 ELENUM   TRT   0(80,1),DIGITS     Find next digit
          LR    6,1                Sets R6 to location of digit
@@ -201,8 +201,8 @@ PLOOP2   MVI   LINE+1,C' '        Clear LINE
          BE    ENDPLOOP           Go to ENDPLOOP
          MVC   ELNAME(13),NAME    PUT NAME ON LINE
          MVC   ELSYMBOL(3),SYMBOL Put Symbol on line
-         MVC   ATNUM(2),=X'40202120'   
-         ED    ATNUM(2),NUMBER    Put Number on line
+         MVC   ATNUM(4),=X'40202120'   
+         ED    ATNUM(4),NUMBER    Put Number on line
          MVC   ELDATE(7),DATE     Put Date on line
          XPRNT LINE,37            Print line 
          A     4,=F'25'           Increment table pointer
