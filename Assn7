@@ -174,7 +174,7 @@ TNUM     PACK  NUMBER(2),0(0,6)   EX for Number
 *  8     Address of Outline variables
 *  9     Loop Counter
 * 12     Base register
-* 13     Address of BUILDSV (save area)
+* 13     Address of PSAVE (save area)
 * 14     Return Address
 ******************************************** 
 PRINT    CSECT
@@ -252,8 +252,27 @@ ELDATE   DS    7C
 *  8     Address of Outline variables
 *  9     Loop Counter
 * 12     Base register
-* 13     Address of BUILDSV (save area)
+* 13     Address of SORTSV (save area)
 * 14     Return Address
 ******************************************** 
+SORT     CSECT
+         STM   14,12,12(13)         Save Registers 
+         LR    12,15                Load Registers
+         USING SORT,12              Use 12 as base register
+         LA    14,SORTSV            Load SORTSV into R14
+         ST    14,4(14)             Load backwards pointer
+         ST    13,4(14)             Load forwards pointer
+         LR    13,14                Load SORTSV
+*
+         USING ENTRY,4            
+         LM    4,5,0(1)           Unload parameters 
+         L     9,8(1)             Load address of buffer 
+*
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+*         
+         LTORG
+SORTSV   DS    18F 
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW7DATA,DISP=SHR
