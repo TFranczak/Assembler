@@ -32,6 +32,21 @@ MAIN     CSECT
          BALR  14,15              Do BUILD subroutine
          XDUMP TABLE,162
          SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(PRINT)       Load virtual address of PRINT
+         BALR  14,15              Do PRINT subroutine
+         SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(SORT)        Load virtual address of Sort
+         BALR  14,15              Do SORT subroutine
+         SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(PRINT)       Load virtual address of PRINT
+         BALR  14,15              Do PRINT subroutine
+         SPACE
 *         
          L     13,4(0,13)         Load backward pointer
          LM    14,12,12(13)       Load registers back
@@ -167,7 +182,6 @@ TEMPB    DS   2B                 Temp for converting to binary
 *  5     EOT Pointer
 *  6     First nonspace of digit
 *  8     Address of Outline variables
-*  9     Loop Counter
 * 10     Address of pagenum
 * 11     Address of printnum
 * 12     Base register
@@ -189,21 +203,101 @@ PRINT    CSECT
          L     10,12(1)           Load address of pagenum 
          L     11,16(1)           Load address of printnum
 *
-PLOOP    CR    4,5                At EoT?
+         CP    0(1,11),=P'1'      First print?
+         BE    PRNTF              Go to prntf
+         MVC   PAGEHERE(2),=X'4020' Prepare for pagenum
+         ED    PAGEHERE(2),0(10)  Put pagenum on line
+         XPRNT SHEAD,78           Print sorted header
+         B     MEET               Meet back up
+PRNTF    MVC   PAGEHER2(2),=X'4020' Prepare for pagenum
+         ED    PAGEHER2(2),0(10)  Put pagenum on line
+         XDUMP PAGEHER2,32
+         XPRNT FHEAD,78
+MEET     AP    0(1,10),=P'1'      Increment pagenum
+         AP    0(1,11),=P'1'      Increment printnum
+         XPRNT DTEXT1,78          Print descriptive headers
+         XPRNT DTEXT2,78
+         XPRNT SPACES,80          Empty line       
+*
+PLOOP    C     4,0(0,5)           At EoT?
          BE    ENDPT              End print
 *
 *        Move print patterns for ED
 *
-         MVC   STUDNUM(9),=C'D82120202020202020'
-         MVC   RENEWDT(12),=C'402120206120206120202020'
-         MVC   GPAO(5),=C'40214B2020'
-         MVC   TOTHRO(4),=C'40202120'
-         MVC   CURHRO(4),=C'40202120'
+         MVC   STUDNUM(11),=X'4021C72020202020202020'
+         MVC   RENEWDT(12),=X'402120206120206120202020'
+         MVC   GPAO(7),=X'402021204B2020'
+         MVC   TOTHRO(4),=X'40202120'
+         MVC   CURHRO(4),=X'40202120'
 *
-         L     6,STUDID           Put STUDID into 6
+*        Put Student ID on line
+*
+         SR    6,6                Zero register 6
+         ICM   6,B'1111',STUDID   Move STUDID into R6
          CVD   6,TEMPDEC          Convert STUDID to dec
-         
-         XPRNT OUTLINE,75         
+         ED    STUDNUM(11),TEMPDEC+3 Send Student Id to line
+* 
+*        Put password on line
+*
+         MVC   TEMPCHAR(12),PASSWD Put PASSWD into temp
+         XC    TEMPCHAR(4),STUDID     Decrypt password
+         XC    TEMPCHAR+4(4),STUDID
+         XC    TEMPCHAR+8(4),STUDID
+         MVC   PASSWORD(12),TEMPCHAR Put passwd on line
+* 
+*        Put renewal Date on line        
+*
+         SR    6,6                Zero R6
+         ICM   6,B'1100',PASSDT   Put date into r6
+         SRL   6,25               Make year alone
+         CVD   6,TEMPDEC          Put year into temp
+         AP    TEMPDEC(8),=P'1980' Add 1980 back
+*
+         SR    6,6                Zero R6
+         ICM   6,B'1100',PASSDT   Put date into r6
+         SLL   6,7                Strip off year
+         SRL   6,28               Strip day
+         CVD   6,TEMPDEC2         Put month into temptemp
+         SRP   TEMPDEC2(8),4,0    Shift left 4
+         AP    TEMPDEC(8),TEMPDEC2(8) Append to year
+*
+         SR    6,6                Zero R6
+         ICM   6,B'1100',PASSDT   Put date into R6
+         SLL   6,11               Strip year and month
+         SRL   6,27               Position day correctly
+         CVD   6,TEMPDEC2         Put day into temptemp
+         SRP   TEMPDEC2(8),6,0    Shift left 6
+         AP    TEMPDEC(8),TEMPDEC2(8) Apppend to month and year
+*
+         ED    RENEWDT(12),TEMPDEC+3 Put date on line
+*
+*        Put major on line
+*
+         MVC   MAJORO(4),MAJOR    Move major from table to line
+*
+*        Put GPA on line
+*
+         ZAP   TEMPDEC(8),GPA(2)  Put GPA into temp
+         ED    GPAO(7),TEMPDEC+5  Fill pattern at GPAO on line
+*
+*        Put total hours on line.
+*
+         SR    6,6                Zero register 6
+         IC    6,CREDHR           Put first byte of credhr in
+         SLL   6,1                Shift to correct position
+         IC    6,CREDHR+1         Put second byte of credhr in
+         CVD   6,TEMPDEC          Convert to decimal, put in temp
+         ED    TOTHRO(4),TEMPDEC+6 Put temp on the line
+*
+*        Put current hours on line.
+*
+         SR    6,6                Zero register 6
+         IC    6,ENROLIN          Put enrolin in 6
+         CVD   6,TEMPDEC          Convert to decimal, put in temp
+         ED    CURHRO(4),TEMPDEC+6 Put temp on the line
+*
+         XPRNT OUTLINE,77
+         LA    4,27(0,4)          Increment table
          B     PLOOP
 *
 ENDPT    L     13,4(0,13)         Load register list
@@ -212,22 +306,48 @@ ENDPT    L     13,4(0,13)         Load register list
 *
          LTORG
 PSAVE    DS    18F                Print Save area
+*
 OUTLINE  DC    C' '               Prints student info
-STUDNUM  DS    9C                 10
-         DC    2C' '              12
-PASSWORD DS    13C                25
-         DC    4C' '              29
-RENEWDT  DS    12C                41
-         DC    5C' '              46
-MAJORO   DS    4C                 50
-         DC    4C' '              54
-GPAO     DS    5C                 59
-         DC    4C' '              63
-TOTHRO   DS    4C                 67
-         DC    4C' '              71
-CURHRO   DS    4C                 75
-         DS    0D                 Puts on doubleword
-TEMPDEC  DS    8P
+STUDNUM  DS    11C                12
+         DC    3C' '              15
+PASSWORD DS    12C                27
+         DC    4C' '              31
+RENEWDT  DS    12C                43
+         DC    5C' '              48
+MAJORO   DS    4C                 52
+         DC    2C' '              54
+GPAO     DS    7C                 61
+         DC    4C' '              65
+TOTHRO   DS    4C                 69
+         DC    4C' '              73
+CURHRO   DS    4C                 77
+*
+SHEAD    DC    C'1'               Print sorted header
+         DC    26C' '             27
+         DC    C'Student Information by GPA' 53
+         DC    C'                 Page  '    76
+PAGEHERE DS    2C                 78
+*
+FHEAD    DC    C'1'               Print sorted header
+         DC    26C' '             27
+         DC    C'Student Information       ' 53
+         DC    C'                 Page  '    76
+PAGEHER2 DC    2C' '              78
+*
+DTEXT1   DC    C'-'               Descriptive header 1-78
+         DC    C'  Student                               '
+         DC    C'                       Total  Current'
+*
+DTEXT2   DC    C' '               Descriptive header 2-78
+         DC    C'   ID        Password         Renewal Da'
+         DC    C'te   Major     GPA     Hours    Hours'
+*
+SPACES   DC    80C' '             Empty line for output formatting
+*
+         DS    D                  Puts on doubleword
+TEMPDEC  DS    8P                 Temp for decimals
+TEMPDEC2 DS    8P                 Temp for temp (tempception)
+TEMPCHAR DS    12C                Temp for password
 ********************************************
 * Sort Subroutine
 *
@@ -257,7 +377,43 @@ SORT     CSECT
          USING ENTRY,4            
          LM    4,5,0(1)             Unload parameters 
 *
+*        External loop
+*
+         LR    6,4
+SLOOP1   LR    4,6                  Reload 4's value
+         C     6,0(0,5)             At eot?
+         BE    ENDSLP1              Go to end
+*
+*        Internal loop
+*
+SLOOP2   C     4,0(0,5)             At eot?
+         BE    ENDSLP2              Go to first loop
+*
+         CP    GPA(2),22(2,6)       Current GPA > Other?
+         BH    SWAP
+*
+AFTRSWAP LA    4,27(0,4)            Increment table ptr
+         B     SLOOP2               Back to second loop
+*
+SWAP     MVC   TEMPLINE(27),0(4)    Copy Current into temp
+         MVC   0(27,4),0(6)         Copy other into current
+         MVC   0(27,6),TEMPLINE     Copy temp into other
+         B     AFTRSWAP
+*
+*        End Internal
+*
+ENDSLP2  LA    6,27(0,6)            Increment table ptr
+         B     SLOOP1               Back to first loop
+*
+*        End external
+*
+ENDSLP1  L     13,4(0,13)           Load register list
+         LM    14,12,12(13)         Reload registers
+         BR    14       
+*
          LTORG
 SORTSV   DS    18F
+TEMPGPA  DS    2P
+TEMPLINE DS    27B
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW8DATA,DISP=SHR
