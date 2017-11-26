@@ -181,7 +181,6 @@ TEMPB    DS   2B                 Temp for converting to binary
 *  4     Table Pointer
 *  5     EOT Pointer
 *  6     First nonspace of digit
-*  8     Address of Outline variables
 * 10     Address of pagenum
 * 11     Address of printnum
 * 12     Base register
@@ -216,8 +215,7 @@ PRNTF    MVC   PAGEHER2(2),=X'4020' Prepare for pagenum
 MEET     AP    0(1,10),=P'1'      Increment pagenum
          AP    0(1,11),=P'1'      Increment printnum
          XPRNT DTEXT1,78          Print descriptive headers
-         XPRNT DTEXT2,78
-         XPRNT SPACES,80          Empty line       
+         XPRNT DTEXT2,78      
 *
 PLOOP    C     4,0(0,5)           At EoT?
          BE    ENDPT              End print
@@ -300,7 +298,8 @@ PLOOP    C     4,0(0,5)           At EoT?
          LA    4,27(0,4)          Increment table
          B     PLOOP
 *
-ENDPT    L     13,4(0,13)         Load register list
+ENDPT    XPRNT SPACES,80          Empty line 
+         L     13,4(0,13)         Load register list
          LM    14,12,12(13)       Reload registers
          BR    14                 Branch back to MAIN
 *
@@ -357,10 +356,9 @@ TEMPCHAR DS    12C                Temp for password
 * 
 * Register Usage
 *
-*  4     Table Pointer
+*  4     Second loop table pointer
 *  5     EOT Pointer
-*  6     Holds beginning of table
-*  7     Temp holder for 4
+*  6     First loop table pointer
 * 12     Base register
 * 13     Address of BUILDSV (save area)
 * 14     Return Address
@@ -390,7 +388,7 @@ SLOOP2   C     4,0(0,5)             At eot?
          BE    ENDSLP2              Go to first loop
 *
          CP    GPA(2),22(2,6)       Current GPA > Other?
-         BH    SWAP
+         BH    SWAP                 Swap elements
 *
 AFTRSWAP LA    4,27(0,4)            Increment table ptr
          B     SLOOP2               Back to second loop
@@ -412,8 +410,7 @@ ENDSLP1  L     13,4(0,13)           Load register list
          BR    14       
 *
          LTORG
-SORTSV   DS    18F
-TEMPGPA  DS    2P
-TEMPLINE DS    27B
+SORTSV   DS    18F                  Sort CSECT save area
+TEMPLINE DS    27B                  Temporary table line
          END
 //FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW8DATA,DISP=SHR
