@@ -1,1 +1,263 @@
-
+//KC03I36A JOB ,'Matt Rycraft',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Assignment 7 - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* Function: 
+* 
+* MAIN
+* Register Usage
+*
+*  1     Parameter List
+* 12     Base register
+* 13     Main save
+* 14     Return Address
+********************************************
+MAIN     CSECT
+         STM   14,12,12(13)       Copy registers
+         LR    12,15              Load 12 as base register
+         USING MAIN,12            Use 12 as base register
+         LA    14,MAINSAVE        Load MAINSAVE into R14
+         ST    13,4(,14)          Link forward pointer
+         ST    14,8(,13)          Link backward pointer
+         LR    13,14              Load MAINSAVE
+         SPACE
+*
+         LA    1,PLIST            Load PLIST into 1
+         L     15,=V(BUILD)       Load virtual address of BUILD
+         BALR  14,15              Do BUILD subroutine
+         XDUMP TABLE,162
+         SPACE
+*         
+         L     13,4(0,13)         Load backward pointer
+         LM    14,12,12(13)       Load registers back
+         BR    14
+*         
+         LTORG                    Literal origin
+         ORG MAIN+((*-MAIN+31)/32)*32
+TABLE    DS    120CL27            Declare entry table
+EOT      DS    F                  Declare end of table 
+BUFFER   DS    80C                Declare buffer
+         DC    C'*'
+*         
+PAGENUM  DC    PL1'1'             packed number for page num
+PRINTNUM DC    PL1'1'             Packed for print
+PLIST    DC    A(TABLE)           Parameter list
+         DC    A(EOT)
+         DC    A(BUFFER)
+         DC    A(PAGENUM)
+         DC    A(PRINTNUM)
+*         
+MAINSAVE DS    18F                Declare MainSave
+ENTRY    DSECT                    Dummy section for table - 27
+STUDID   DS    4B                 Student ID
+PASSWD   DS    12B                Password
+PASSDT   DS    2B                 Password reset date
+MAJOR    DS    4B                 Major
+GPA      DS    2P                 Grade point average
+CREDHR   DS    2B                 Credit Hours
+ENROLIN  DS    1B                 Hours enrolled in
+********************************************
+* Build Subroutine
+*
+* Function: Reads in numbers from an 
+* unknown file and builds a table of  
+* 120 Full words, The element name, symbol
+* the date the element was found and 
+* the elements atomic weight 
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     For CVD
+*  9     Address of buffer
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
+********************************************
+BUILD    CSECT
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as base register
+         USING BUILD,12           Use 12 as base register
+         LA    14,BUILDSV         Load buildsv into register 14
+         ST    14,8(0,14)         Load backward pointer
+         ST    13,4(0,14)         Load forward pointer
+         LR    13,14              Load BuildSv
+*         
+         USING ENTRY,4            Starts using DSECT         
+         LM    4,5,0(1)           Unload parameters 
+         L     9,8(1)             Load address of buffer 
+*         
+BLOOP1   XREAD 0(0,9),80          Read into buffer 
+         BC    B'0100',ENDBLP     END Loop
+         PACK  TSTUDID(8),1(8,9)  Grab Student ID
+         MVC   PASSWD(12),10(9)   Grab pass from line
+         PACK  YEARP(8),27(4,9)   Grab Year from line
+         PACK  DAYP(8),23(2,9)    Grab day from line
+         PACK  MONTHP(8),25(2,9)  Grab Month from line
+         MVC   MAJOR(4),32(9)     Grab Major, put in Table
+         PACK  GPA(2),37(3,9)     Grab GPA from line
+         PACK  TOTHOUR(8),41(3,9) Grab Total Hours from line
+         PACK  HRENROLL(8),45(2,9) Grab Hours enrolled from line
+*
+*        Handle data manipulation to store in table
+*
+         CVB   6,TSTUDID          Convert TSTUDID to binary
+         STCM  6,B'1111',STUDID   Put student id into table
+*
+         CVB   6,TOTHOUR          Convert ToTHOUR to binary
+         STCM  6,B'0011',CREDHR   Put credit hours into table
+*
+         CVB   6,HRENROLL         Convernt HRENROLL to binary
+         STCM  6,B'0001',ENROLIN  Put hours enrolled into table
+*
+         XC    PASSWD(4),STUDID   XOR Password encryption
+         XC    PASSWD+4(4),STUDID
+         XC    PASSWD+8(4),STUDID 
+*
+         SP    YEARP(8),=P'1980'  Subtract 1980 from year
+         CVB   6,YEARP            Convert YEARP to binary
+         SLL   6,9                Shift year into correct bits
+         STCM  6,B'0011',PASSDT   Put year in table
+*
+         CVB   6,MONTHP           Shift month to binary
+         SLL   6,5                Shift month into correct bit
+         STCM  6,B'0011',TEMPB    Store into TEMPB
+         OC    PASSDT(2),TEMPB    Add to DATE
+*
+         CVB   6,DAYP             Convert Day to binary
+         STCM  6,B'0011',TEMPB    Store into TEMPB
+         OC    PASSDT(2),TEMPB    Add to DATE
+*
+         LA    4,27(0,4)          Increment TABLE
+         B     BLOOP1             Back to BLOOP1
+*        
+ENDBLP   ST    4,0(5)             Store EOT at last unused spot
+         L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+*         
+         LTORG                                                          
+BUILDSV  DS   18F                Allocate 18F for save area
+EPHRASE  DS   12B                
+PHRASE   DS   12B
+         DS   0D                 Start on double boundary
+TSTUDID  DS   8P                 Temp spot for Student ID
+TOTHOUR  DS   8P                 Temp for total hours
+HRENROLL DS   8P                 Temp for enrolled hours
+YEARP    DS   8P                 Temp for year
+MONTHP   DS   8P                 Temp for month
+DAYP     DS   8P                 Temp for day
+TEMPB    DS   2B                 Temp for converting to binary
+*
+********************************************
+* Print Subroutine
+*
+* Function: Prints the contents of the table
+* no more then 50 per page. 
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     First nonspace of digit
+*  8     Address of Outline variables
+*  9     Loop Counter
+* 10     Address of pagenum
+* 11     Address of printnum
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
+******************************************** 
+PRINT    CSECT
+         STM   14,12,12(13)       Save registers
+         LR    12,15              Load 12 as base register
+         USING PRINT,12           Use 12 as base register
+         LA    14,PSAVE           Load buildsv into register 14
+         ST    14,8(0,14)         Load backward pointer
+         ST    13,4(0,14)         Load forward pointer
+         LR    13,14              Load BuildSv
+*         
+         USING ENTRY,4            
+         LM    4,5,0(1)           Unload parameters 
+         L     9,8(1)             Load address of buffer
+         L     10,12(1)           Load address of pagenum 
+         L     11,16(1)           Load address of printnum
+*
+PLOOP    CR    4,5                At EoT?
+         BE    ENDPT              End print
+*
+*        Move print patterns for ED
+*
+         MVC   STUDNUM(9),=C'D82120202020202020'
+         MVC   RENEWDT(12),=C'402120206120206120202020'
+         MVC   GPAO(5),=C'40214B2020'
+         MVC   TOTHRO(4),=C'40202120'
+         MVC   CURHRO(4),=C'40202120'
+*
+         L     6,STUDID           Put STUDID into 6
+         CVD   6,TEMPDEC          Convert STUDID to dec
+         
+         XPRNT OUTLINE,75         
+         B     PLOOP
+*
+ENDPT    L     13,4(0,13)         Load register list
+         LM    14,12,12(13)       Reload registers
+         BR    14                 Branch back to MAIN
+*
+         LTORG
+PSAVE    DS    18F                Print Save area
+OUTLINE  DC    C' '               Prints student info
+STUDNUM  DS    9C                 10
+         DC    2C' '              12
+PASSWORD DS    13C                25
+         DC    4C' '              29
+RENEWDT  DS    12C                41
+         DC    5C' '              46
+MAJORO   DS    4C                 50
+         DC    4C' '              54
+GPAO     DS    5C                 59
+         DC    4C' '              63
+TOTHRO   DS    4C                 67
+         DC    4C' '              71
+CURHRO   DS    4C                 75
+         DS    0D                 Puts on doubleword
+TEMPDEC  DS    8P
+********************************************
+* Sort Subroutine
+*
+* Function: Sorts the table alphabetically
+* calls print to reprint the newly sorted 
+* table
+* 
+* Register Usage
+*
+*  4     Table Pointer
+*  5     EOT Pointer
+*  6     Holds beginning of table
+*  7     Temp holder for 4
+* 12     Base register
+* 13     Address of BUILDSV (save area)
+* 14     Return Address
+********************************************
+SORT     CSECT
+         STM   14,12,12(13)         Save Registers 
+         LR    12,15                Load Registers
+         USING SORT,12              Use 12 as base register
+         LA    14,SORTSV            Load SORTSV into R14
+         ST    14,4(14)             Load backwards pointer
+         ST    13,4(14)             Load forwards pointer
+         LR    13,14                Load SORTSV
+*
+         USING ENTRY,4            
+         LM    4,5,0(1)             Unload parameters 
+*
+         LTORG
+SORTSV   DS    18F
+         END
+//FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HW8DATA,DISP=SHR
