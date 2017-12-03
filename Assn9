@@ -1,0 +1,127 @@
+//KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H
+//STEP1   EXEC  PGM=ASSIST,PARM='MACRO=H'
+//STEPLIB   DD  DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT  DD  SYSOUT=*
+//SYSIN     DD  * 
+********************************************
+* Assignment 9 - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* First Macro: Compare two c strings
+*              CC 0 if First = Second
+*              CC 1 if First < Second
+*              CC 2 if First > Second
+*
+* Register Usage
+*
+*  2     First string address
+*  3     First string length
+*  4     Second string address
+*  5     Second string length
+********************************************
+         MACRO
+         STRCMP &FIRST,&SECOND
+         AIF   ('&FIRST' EQ '').ERROR   If FIRST  empty, error
+         AIF   ('&SECOND' EQ '').ERROR  If SECOND empty, error
+         STM   2,5,R&SYSNDX             Copy registers
+         LA    2,&FIRST                 Load first string
+         LA    4,&SECOND                Load second string
+         CR    2,4                      Same string?
+         BE    F&SYSNDX                 Finish program
+         SR    3,3                      Zero first  length
+         SR    5,5                      Zero second length
+         B     B&SYSNDX                 Skip declaration
+R&SYSNDX DS    4F                       4F area for register storage
+*
+*        Count string lengths
+*
+B&SYSNDX CLI   0(2),X'00'               At end of string?
+         BE    S&SYSNDX                 Check second string length
+         A     3,=F'1'                  Add 1 to string length
+         LA    2,1(0,2)                 Increment letter
+         B     B&SYSNDX                 Recheck
+*
+S&SYSNDX CLI   0(4),X'00'               At end of string?
+         BE    C&SYSNDX                 Branch to compare lengths
+         A     5,=F'1'                  Add 1 to string length
+         LA    4,1(0,4)                 Increment letter
+         B     S&SYSNDX                 Recheck
+*
+C&SYSNDX CR    3,5                      Lengths the same?
+         BE    M&SYSNDX                 Branch to main compare
+         B     E&SYSNDX                 Not same? Branch to end
+*
+*        Main compare
+*
+M&SYSNDX LA    2,&FIRST                 Load address of first
+         LA    4,&SECOND                Load address of second
+         CLCL  2,4                      Same letters?
+E&SYSNDX LM    2,5,R&SYSNDX             Restore registers
+F&SYSNDX DS    0H
+         MEXIT
+.ERROR   MNOTE '*** MISSING ARGUMENT(S) ***'
+         MEND
+********************************************
+* Second Macro: Return highest element in list
+*
+* Register Usage
+*
+*  2     Current number
+*  3     Highest Number
+********************************************
+         MACRO
+         MAX &RESULT,&LIST
+         LCLA  &CNTR                     Declare variable cntr
+         LCLA  &TOTL                     Declare variable totl
+         AIF   ('&RESULT' EQ '').MISSING If RESULT empty, error
+         AIF   ('&LIST' EQ '').MISSING   If LIST empty, error
+         AIF   ('&LIST' EQ '()').EMPTY   If LIST has no elements
+&TOTL    SETA  N'&SYSLIST(2)             Set TOT to number of elements
+&CNTR    SETA  1                         Set CTR to 1
+         AIF   (&TOTL EQ 1).ONEARG       If only 1 arg, end
+         STM   2,3,R&SYSNDX              Store register copy
+         L     2,&SYSLIST(2,&CNTR)       Load first number
+         L     3,&SYSLIST(2,&CNTR)       Load first number into max
+         B     C&SYSNDX                  Skip declaration
+R&SYSNDX DS    2F                        Register list
+*
+*        Max compare loop
+*
+C&SYSNDX DS    0H
+.LOOP    ANOP                            Begin loop
+&CNTR    SETA  &CNTR+1
+         AIF   (&CNTR GT &TOTL).RESTORE  At end of list?
+         L     2,&SYSLIST(2,&CNTR)       Load next element
+         CR    2,3                       Bigger than max?
+         BH    A&CNTR&SYSNDX             Go to swap elements
+         B     B&CNTR&SYSNDX             Skip max swap
+A&CNTR&SYSNDX   LR    3,2                Set 3 to max
+B&CNTR&SYSNDX   DS    0H
+         AGO   .LOOP                     Back to top
+.RESTORE ANOP
+E&SYSNDX ST    3,&RESULT                 Store max in return
+         LM    2,3,R&SYSNDX              Restore register
+         AGO   .DONE                     Finish MACRO
+.*
+.ONEARG  ANOP
+         ST    3,Y&SYSNDX                Store register
+         B     A&SYSNDX                  Skip declaration
+Y&SYSNDX DS    F
+A&SYSNDX L     3,&SYSLIST(2,1)           Load first element into max
+         ST    3,&RESULT                 Store result in return
+         L     3,Y&SYSNDX                Reload 3
+         AGO   .DONE
+.*
+         MEXIT
+.MISSING MNOTE '*** MISSING ARGUMENT ***'
+         AGO   .DONE
+.*
+.EMPTY   MNOTE '*** EMPTY PARAMETER LIST ***'
+         AGO   .DONE
+.*
+.DONE    ANOP
+         MEND
+//          DD DSN=KC02314.AUTUMN17.CSCI360.HW9DRVR,DISP=SHR
+//FT05F001  DD DUMMY
+//FT06F001  DD SYSOUT=*
+//
