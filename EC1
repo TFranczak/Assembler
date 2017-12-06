@@ -1,0 +1,119 @@
+//KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Extra Credit - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* Function:
+* 
+* MAIN
+* Register Usage
+*
+*  1     Used for EDMK
+*  2/3   Temporarily for division
+*  8     Static Num 1 (A)
+*  9     Static Num 2 (B)
+* 10     Remainder    (C)
+* 11     Quotient     (D)
+* 12     Absolute(B)  (E)
+* 13     Result       (Result)
+* 15     Base register
+********************************************
+MAIN     CSECT
+         USING MAIN,15         
+LOOP     XREAD BUFFER,80
+         BC    B'0100',ENDLP
+         PACK  NUM1P(8),BUFFER(6)
+         PACK  NUM2P(8),BUFFER+8(6)
+         CVB   8,NUM1P
+         CVB   9,NUM2P
+*
+*        Start algorithm
+*
+         LR    11,8                  
+         M     10,=F'1'              Make Num1 64bit
+         DR    10,9                  Set 10 remainder, 11 quotient
+         LR    13,10                 
+         MR    12,9                  Set 13 C times B
+*
+*        Set D = 2 * Abs(D)        
+*
+         LR    2,10                 Make copy of C
+         C     11,=F'-1'             Is 11 pos?
+         BH    DPOS                  Skip multiply by neg
+         M     10,=F'-2'             Set 11 D = Abs(D)*2
+         B     REST                  
+DPOS     M     10,=F'2'              Set 11 D = Abs(D)*2                  
+REST     LR    10,2                  Restore C
+*
+*        Set E = Abs(B)
+*
+         C     9,=F'-1'              B pos?
+         BH    BPOS
+         LR    3,9                   Load 3 for mult
+         M     2,=F'-1'              Make 9 positive
+         LR    12,3                  Set 12 E = Abs(B)
+         B     BNEG
+BPOS     LR    12,9                  Set 12 E = B
+*
+*        D >= E?
+*            A > 0?
+*                Result = Result + E
+*            Else
+*                Result = Result - E
+*
+BNEG     CR    11,12                 D >= E?
+         BL    GOPRNT
+         C     8,=F'0'               A > 0?
+         BNH   SUBE                  Go sub e from result
+         AR    13,12                 Result += E
+         B     GOPRNT                Skip add e
+SUBE     SR    13,12                 Result -= E
+*
+*        Print formatting
+*
+GOPRNT   LA    1,LINE+8              Default for neg sign
+         MVC   LINE+3(6),=X'402020202120'
+         EDMK  LINE+3(6),NUM1P+5     Put first num on line
+         S     1,=F'1'               Place neg in right spot
+         C     8,=F'0'               neg?
+         BNL   FPOS
+         MVI   0(1),C'-'             Put neg sign in right place
+*
+FPOS     LA    1,LINE+24             Default for neg sign
+         MVC   LINE+19(6),=X'402020202120'
+         EDMK  LINE+19(6),NUM2P+5    Put second num on line
+         S     1,=F'1'               Place neg in right spot
+         C     9,=F'0'               neg?
+         BNL   SPOS
+         MVI   0(1),C'-'             Put neg sign in right place
+*
+SPOS     CVD   13,RESULT             Convert result to decimal
+         LA    1,LINE+40             Default for neg sign
+         MVC   LINE+35(6),=X'402020202120'
+         EDMK  LINE+35(6),RESULT+5   Put second num on line
+         S     1,=F'1'               Place neg in right spot
+         C     13,=F'0'              neg?
+         BNH   RPOS
+         MVI   0(1),C'-'             Put neg sign in right place
+RPOS     XPRNT LINE,41
+         B     LOOP
+ENDLP    BR    14
+         LTORG
+BUFFER   DS    80C
+         DS    0D                Put packed on doubleword
+NUM1P    DS    8P                 8 byte packed num1
+NUM2P    DS    8P                 8 byte packed num2
+RESULT   DS    8P                 8 byte packed Result
+LINE     DC    C'0'              Print line - 41
+         DC    2C' '              1
+         DS    6C                 3
+         DC    10C' '             9
+         DS    6C                 19
+         DC    10C' '             25
+         DS    6C                 35
+         END
+//FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HWEXDATA,DISP=SHR
