@@ -1,0 +1,114 @@
+//KC03I36A JOB ,'Tommy Franczak',MSGCLASS=H
+//STEP1 EXEC PGM=ASSIST
+//STEPLIB DD DSN=KC02293.ASSIST.LOADLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSIN DD *
+********************************************
+* Extra Credit - Pair Programmed
+* Names: Tommy Franczak, Matt Rycraft
+*
+* Function:
+* 
+* MAIN
+* Register Usage
+*
+*  1     Used for EDMK
+* 14     Used to go home
+* 15     Base register
+********************************************
+MAIN     CSECT
+         USING MAIN,15         
+LOOP     XREAD BUFFER,80
+         BC    B'0100',ENDLP
+         PACK  NUM1(8),BUFFER(6)     Get num1 from line
+         PACK  NUM2(8),BUFFER+8(6)   Get num2 from line
+         ZAP   NUMA(8),NUM1(8)       Fill A with num1
+         ZAP   NUMB(8),NUM2(8)       Fill B with num2
+*
+*        Start algorithm
+*
+         DP    NUMA(8),NUMB+4(4)     Divide first by second
+         ZAP   NUMC(8),NUMA(4)       Set C to quotient
+         ZAP   NUMD(8),NUMA+4(4)     Set D to remainder
+         ZAP   TEMP(4),NUMC+4(4)      Set temp to C
+         ZAP   RESULT(8),NUMB(8)     Set Result to B
+         MP    RESULT(8),TEMP(4)     Result = C*B
+*
+*        Set D = 2 * Abs(D)        
+*
+         CP    NUMD(8),=P'0'         D >= 0?
+         BNL   DPOS
+         MP    NUMD(8),=P'-1'        Mult D by -1
+DPOS     MP    NUMD(8),=P'2'         Mult D by 2
+*
+*        Set E = Abs(B)
+*
+         ZAP   NUMB(8),NUM2(8)       Reset B to num2
+         CP    NUM2(8),=P'0'         B >= 0?
+         BNL   BPOS
+         MP    NUMB(8),=P'-1'        Make B=abs(B)
+BPOS     ZAP   NUME(8),NUMB(8)       Set E=abs(B)
+*
+*        D >= E?
+*            A > 0?
+*                Result = Result + E
+*            Else
+*                Result = Result - E
+*
+         CP    NUMD(8),NUME(8)       D >= E?
+         BL    GOPRNT
+         CP    NUM1(8),=P'0'         A > 0?
+         BNH   ELSE
+         AP    RESULT(8),NUME(8)     Result += E
+         B     GOPRNT
+ELSE     SP    RESULT(8),NUME(8)     Result -= E
+*
+*        Print formatting
+*
+GOPRNT   LA    1,LINE+8              Default for neg sign
+         MVC   LINE+3(6),=X'402020202120'
+         EDMK  LINE+3(6),NUM1+5      Put first num on line
+         S     1,=F'1'               Place neg in right spot
+         CP    NUM1(8),=P'0'         neg?
+         BNL   FPOS
+         MVI   0(1),C'-'             Put neg sign in right place
+*
+FPOS     LA    1,LINE+24             Default for neg sign
+         MVC   LINE+19(6),=X'402020202120'
+         EDMK  LINE+19(6),NUM2+5    Put second num on line
+         S     1,=F'1'               Place neg in right spot
+         CP    NUM2(8),=P'0'         neg?
+         BNL   SPOS
+         MVI   0(1),C'-'             Put neg sign in right place
+*
+SPOS     LA    1,LINE+40             Default for neg sign
+         MVC   LINE+35(6),=X'402020202120'
+         EDMK  LINE+35(6),RESULT+5   Put second num on line
+         S     1,=F'1'               Place neg in right spot
+         CP    RESULT(8),=P'0'       neg?
+         BNL   RPOS
+         MVI   0(1),C'-'             Put neg sign in right place
+RPOS     XPRNT LINE,41
+         B     LOOP
+ENDLP    BR    14
+         LTORG
+BUFFER   DS    80C
+         DS    0D                Put packed on doubleword
+NUM1     DS    8P                 8 byte packed num1
+NUM2     DS    8P                 8 byte packed num2
+NUMA     DS    8P
+NUMB     DS    8P
+NUMC     DS    8P
+NUMD     DS    8P
+NUME     DS    8P
+TEMP     DS    4P
+RESULT   DS    8P                 8 byte packed Result
+LINE     DC    C'0'              Print line - 41
+         DC    2C' '              1
+         DS    6C                 3
+         DC    10C' '             9
+         DS    6C                 19
+         DC    10C' '             25
+         DS    6C                 35
+         END
+//FT05F001  DD  DSN=KC02314.AUTUMN17.CSCI360.HWEXDATA,DISP=SHR
