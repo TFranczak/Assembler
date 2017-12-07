@@ -16,8 +16,8 @@
 *  2/3   Temporarily for division
 *  8     Static Num 1 (A)
 *  9     Static Num 2 (B)
-* 10     Remainder    (C)
-* 11     Quotient     (D)
+* 10     Quotient     (C)
+* 11     Remainder    (D)
 * 12     Absolute(B)  (E)
 * 13     Result       (Result)
 * 15     Base register
@@ -36,12 +36,15 @@ LOOP     XREAD BUFFER,80
          LR    11,8                  
          M     10,=F'1'              Make Num1 64bit
          DR    10,9                  Set 10 remainder, 11 quotient
-         LR    13,10                 
+         LR    2,10                  Swap the two
+         LR    10,11
+         LR    11,2
+         LR    13,10                 Put C into result
          MR    12,9                  Set 13 C times B
 *
 *        Set D = 2 * Abs(D)        
 *
-         LR    2,10                 Make copy of C
+         LR    2,10                  Make copy of C
          C     11,=F'-1'             Is 11 pos?
          BH    DPOS                  Skip multiply by neg
          M     10,=F'-2'             Set 11 D = Abs(D)*2
@@ -97,7 +100,7 @@ SPOS     CVD   13,RESULT             Convert result to decimal
          EDMK  LINE+35(6),RESULT+5   Put second num on line
          S     1,=F'1'               Place neg in right spot
          C     13,=F'0'              neg?
-         BNH   RPOS
+         BNL   RPOS
          MVI   0(1),C'-'             Put neg sign in right place
 RPOS     XPRNT LINE,41
          B     LOOP
